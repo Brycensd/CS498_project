@@ -63,7 +63,17 @@ Features never import other features.
 ## Models
 
 Frozen dataclasses with string ids (so server UUIDs work later). Values are converted once
-when created: grades are `int` (V-scale), dates are `date`/`datetime`. Images are stored as
+when created: grades are `int` (V-scale), dates are `date`/`datetime`.
+
+Each climb has three separate difficulty/appearance fields:
+
+- `grade` - the exact V-grade, e.g. V5.
+- `tag` - the colored difficulty tag (`TagColor`). Tags overlap: Red V0, Yellow V0–V2,
+  Green V1–V3, White V2–V4, Blue V3–V5, Black V4–V6, Purple V5–V7, Orange V6–V8,
+  Pink V7–V9. The ranges live in one table, `TAG_GRADE_RANGES` in `core/models.py`.
+- `hold_color` - any color; unrelated to the tag.
+
+Images are stored as
 a string that is either an asset path (`walls/section_1.png`) or a URL - `ft.Image` accepts
 both, so moving photos to a server later does not change the model.
 
@@ -115,7 +125,8 @@ app.
 ## Decisions for the team
 
 1. **Models** - are the fields in `core/models.py` right? Are gyms bouldering-only
-   (V-scale `int` grades) or do we also need rope grades (YDS)?
+   (V-scale `int` grades) or do we also need rope grades (YDS)? Confirm the tag ranges from
+   White upward against the gym's chart.
 2. **Cross-feature navigation** - e.g. the ascents feature opening a climb detail page.
    Features can't import each other. Options: (a) a shared event such as
    `ClimbDetailRequested(climb_id)` in `core/events.py` that the sections feature handles,

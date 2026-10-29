@@ -2,13 +2,14 @@ from datetime import date
 
 import pytest
 
-from core.models import Climb, Section
+from core.models import Climb, Section, TagColor
 from features.sections.logic import (
     SORT_LABELS,
     ClimbFilter,
     SortOrder,
-    available_colors,
+    available_hold_colors,
     climb_details,
+    climb_subtitle,
     filter_climbs,
     grade_span,
     section_summary,
@@ -16,8 +17,8 @@ from features.sections.logic import (
 )
 
 
-def climb(cid: str, name: str, grade: int, color: str = "Red", day: int = 1) -> Climb:
-    return Climb(cid, "s1", name, grade, color, "Sam", date(2026, 9, day))
+def climb(cid: str, name: str, grade: int, hold_color: str = "Red", day: int = 1) -> Climb:
+    return Climb(cid, "s1", name, grade, TagColor.BLUE, hold_color, "Sam", date(2026, 9, day))
 
 
 CLIMBS = [
@@ -44,12 +45,12 @@ class TestFilter:
         assert names(filter_climbs(CLIMBS, ClimbFilter(min_grade=5))) == ["Dyno"]
         assert names(filter_climbs(CLIMBS, ClimbFilter(max_grade=1))) == ["arete"]
 
-    def test_colors(self):
-        result = filter_climbs(CLIMBS, ClimbFilter(colors=frozenset({"Red", "Green"})))
+    def test_hold_colors(self):
+        result = filter_climbs(CLIMBS, ClimbFilter(hold_colors=frozenset({"Red", "Green"})))
         assert names(result) == ["Crimp", "Dyno", "Balance"]
 
     def test_filters_combine(self):
-        result = filter_climbs(CLIMBS, ClimbFilter(min_grade=5, colors=frozenset({"Red"})))
+        result = filter_climbs(CLIMBS, ClimbFilter(min_grade=5, hold_colors=frozenset({"Red"})))
         assert names(result) == ["Dyno"]
 
 
@@ -91,8 +92,8 @@ class TestSort:
         assert SORT_LABELS[order]
 
 
-def test_available_colors_are_unique_and_sorted():
-    assert available_colors(CLIMBS) == ["Blue", "Green", "Red"]
+def test_available_hold_colors_are_unique_and_sorted():
+    assert available_hold_colors(CLIMBS) == ["Blue", "Green", "Red"]
 
 
 @pytest.mark.parametrize(
@@ -109,11 +110,17 @@ def test_section_summary():
     assert section_summary([]) == "No climbs"
 
 
+def test_climb_subtitle_puts_labels_before_values():
+    assert climb_subtitle(climb("x", "X", 5, "Pink")) == "Grade V5 · Hold color Pink"
+
+
 def test_climb_details():
     section = Section("s1", "g1", 1, "Section 1")
-    rows = dict(climb_details(CLIMBS[0], section))
-    assert rows == {
+    rows = climb_details(CLIMBS[0], section)
+    assert [label for label, _ in rows][:3] == ["Grade", "Tag", "Hold color"]
+    assert dict(rows) == {
         "Grade": "V4",
+        "Tag": "Blue (V3–V5)",
         "Hold color": "Red",
         "Section": "Section 1",
         "Setter": "Sam",

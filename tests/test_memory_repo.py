@@ -17,6 +17,12 @@ def test_seed_has_eight_numbered_sections_with_two_or_three_climbs():
         assert section.wall_image == f"walls/section_{section.number}.png"
 
 
+def test_seeded_grades_fall_inside_their_tag_range():
+    for climb in seed_repositories().climbs.list_climbs():
+        low, high = climb.tag.grade_range
+        assert low <= climb.grade <= high, climb
+
+
 def test_lookups_by_id():
     repo = seed_repositories().climbs
     climb = repo.list_climbs("s3")[0]

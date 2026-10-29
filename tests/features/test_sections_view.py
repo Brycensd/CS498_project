@@ -39,15 +39,15 @@ def test_section_screen_sorts_and_filters(ctx):
     assert grades == sorted(grades, reverse=True)
     assert len(screen.climb_list.controls) == len(climbs)
 
-    color = climbs[0].color
-    screen.color_dropdown.value = color
+    color = climbs[0].hold_color
+    screen.hold_color_dropdown.value = color
     screen.refresh()
-    assert {c.color for c in screen.visible_climbs()} == {color}
+    assert {c.hold_color for c in screen.visible_climbs()} == {color}
 
 
 def test_filter_with_no_matches_shows_message(ctx):
     screen = view.open_section(ctx, ctx.repos.climbs.get_section("s1"))
-    screen.color_dropdown.value = "Chartreuse"
+    screen.hold_color_dropdown.value = "Chartreuse"
     screen.refresh()
     assert screen.climb_list.controls[0].title.value == "No climbs match these filters"
 

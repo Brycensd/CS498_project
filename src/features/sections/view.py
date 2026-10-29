@@ -5,7 +5,7 @@ from __future__ import annotations
 import flet as ft
 
 from core.context import AppContext
-from core.models import Climb, Section
+from core.models import Climb, Section, TagColor
 
 from . import logic
 
@@ -37,15 +37,16 @@ def open_section(ctx: AppContext, section: Section) -> SectionScreen:
 
 def open_climb(ctx: AppContext, climb: Climb) -> None:
     section = ctx.repos.climbs.get_section(climb.section_id)
+    # Label first, value after it on the same line: "Grade      V5".
     rows = [
-        ft.ListTile(title=ft.Text(value), subtitle=ft.Text(label))
+        ft.ListTile(title=ft.Text(label), trailing=ft.Text(value, size=16))
         for label, value in logic.climb_details(climb, section)
     ]
     header = ft.Container(
         padding=ft.Padding.symmetric(horizontal=16, vertical=8),
         content=ft.Row(
             [
-                hold_dot(climb.color, size=28),
+                tag_chip(climb.tag, height=24),
                 ft.Text(climb.name, theme_style=ft.TextThemeStyle.HEADLINE_SMALL),
             ]
         ),
@@ -71,12 +72,12 @@ class SectionScreen:
             ],
             on_select=lambda _e: self.refresh(),
         )
-        self.color_dropdown = ft.Dropdown(
+        self.hold_color_dropdown = ft.Dropdown(
             label="Hold color",
             expand=True,
             value=ALL_COLORS,
             options=[ft.DropdownOption(key=ALL_COLORS, text="All colors")]
-            + [ft.DropdownOption(key=c, text=c) for c in logic.available_colors(self._climbs)],
+            + [ft.DropdownOption(key=c, text=c) for c in logic.available_hold_colors(self._climbs)],
             on_select=lambda _e: self.refresh(),
         )
         self.climb_list = ft.Column(spacing=0)
@@ -87,7 +88,7 @@ class SectionScreen:
                 wall_photo(section),
                 ft.Container(
                     padding=ft.Padding.symmetric(horizontal=16, vertical=8),
-                    content=ft.Row([self.sort_dropdown, self.color_dropdown]),
+                    content=ft.Row([self.sort_dropdown, self.hold_color_dropdown]),
                 ),
                 self.climb_list,
             ],
@@ -95,9 +96,9 @@ class SectionScreen:
         self.refresh()
 
     def visible_climbs(self) -> list[Climb]:
-        color = self.color_dropdown.value
+        color = self.hold_color_dropdown.value
         colors = frozenset() if color in (None, ALL_COLORS) else frozenset({color})
-        matching = logic.filter_climbs(self._climbs, logic.ClimbFilter(colors=colors))
+        matching = logic.filter_climbs(self._climbs, logic.ClimbFilter(hold_colors=colors))
         return logic.sort_climbs(matching, logic.SortOrder(self.sort_dropdown.value))
 
     def refresh(self) -> None:
@@ -109,9 +110,9 @@ class SectionScreen:
 
     def _climb_tile(self, climb: Climb) -> ft.Control:
         return ft.ListTile(
-            leading=hold_dot(climb.color),
+            leading=tag_chip(climb.tag),
             title=ft.Text(climb.name),
-            subtitle=ft.Text(f"{climb.grade_label} · set by {climb.setter}"),
+            subtitle=ft.Text(logic.climb_subtitle(climb)),
             trailing=ft.Icon(ft.Icons.CHEVRON_RIGHT),
             on_click=lambda _e, c=climb: open_climb(self._ctx, c),
         )
@@ -148,12 +149,15 @@ def wall_photo(section: Section) -> ft.Control:
     )
 
 
-def hold_dot(color: str, size: int = 20) -> ft.Control:
-    # Hold color names ("Red", "Blue") map onto Flet's named colors; unknown names show grey.
+def tag_chip(tag: TagColor, height: int = 18) -> ft.Control:
+    """A small rectangle in the climb's difficulty-tag color, like the physical tag."""
     return ft.Container(
-        width=size,
-        height=size,
-        border_radius=size / 2,
-        bgcolor=getattr(ft.Colors, color.upper(), ft.Colors.GREY),
+        width=height * 1.6,
+        height=height,
+        border_radius=4,
+        # Tag names ("Red", "Pink") are all Flet named colors.
+        bgcolor=getattr(ft.Colors, tag.name),
+        # The outline keeps black and white tags visible on dark and light themes.
         border=ft.Border.all(1, ft.Colors.OUTLINE),
+        tooltip=f"{tag} tag ({tag.range_label})",
     )

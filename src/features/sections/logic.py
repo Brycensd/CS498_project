@@ -30,14 +30,14 @@ class ClimbFilter:
 
     min_grade: int | None = None
     max_grade: int | None = None
-    colors: frozenset[str] = frozenset()
+    hold_colors: frozenset[str] = frozenset()
 
     def matches(self, climb: Climb) -> bool:
         if self.min_grade is not None and climb.grade < self.min_grade:
             return False
         if self.max_grade is not None and climb.grade > self.max_grade:
             return False
-        return not self.colors or climb.color in self.colors
+        return not self.hold_colors or climb.hold_color in self.hold_colors
 
 
 def filter_climbs(climbs: Iterable[Climb], climb_filter: ClimbFilter) -> list[Climb]:
@@ -55,8 +55,8 @@ def sort_climbs(climbs: Iterable[Climb], order: SortOrder) -> list[Climb]:
     return sorted(climbs, key=lambda c: (c.name.casefold(), c.id))
 
 
-def available_colors(climbs: Iterable[Climb]) -> list[str]:
-    return sorted({c.color for c in climbs})
+def available_hold_colors(climbs: Iterable[Climb]) -> list[str]:
+    return sorted({c.hold_color for c in climbs})
 
 
 def grade_span(climbs: Iterable[Climb]) -> str:
@@ -75,12 +75,18 @@ def section_summary(climbs: list[Climb]) -> str:
     return f"{len(climbs)} {noun} · {grade_span(climbs)}"
 
 
+def climb_subtitle(climb: Climb) -> str:
+    """Subtitle in the climb list, e.g. "Grade V5 · Hold color Pink"."""
+    return f"Grade {climb.grade_label} · Hold color {climb.hold_color}"
+
+
 def climb_details(climb: Climb, section: Section | None) -> list[tuple[str, str]]:
-    """(label, value) rows for the climb detail screen."""
+    """(label, value) rows for the climb detail screen; the label is shown first."""
     set_on = climb.set_on
     return [
         ("Grade", climb.grade_label),
-        ("Hold color", climb.color),
+        ("Tag", f"{climb.tag} ({climb.tag.range_label})"),
+        ("Hold color", climb.hold_color),
         ("Section", section.name if section else "Unknown"),
         ("Setter", climb.setter),
         ("Set on", f"{set_on:%b} {set_on.day}, {set_on.year}"),

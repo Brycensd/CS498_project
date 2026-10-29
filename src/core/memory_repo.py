@@ -8,7 +8,7 @@ from __future__ import annotations
 from collections import defaultdict
 from datetime import date
 
-from core.models import Ascent, Climb, Comment, Gym, Section, User
+from core.models import Ascent, Climb, Comment, Gym, Section, TagColor, User
 from core.repositories import Repositories
 
 SECTION_COUNT = 8
@@ -74,20 +74,21 @@ class InMemoryUserRepository:
         return list(self._users.values())
 
 
-# (name, grade, color) placeholders, cycled through the sections.
+# (name, grade, tag, hold color) placeholders, cycled through the sections. Hold colors
+# deliberately differ from tags so the UI shows they are independent.
 _PLACEHOLDER_CLIMBS = [
-    ("Warm Welcome", 0, "Yellow"),
-    ("Crimp Lord", 4, "Red"),
-    ("Slab City", 2, "Blue"),
-    ("Dyno Might", 6, "Black"),
-    ("Pinch Me", 3, "Green"),
-    ("Heel Yeah", 5, "Purple"),
-    ("Sloper Opera", 4, "Orange"),
-    ("Jug Life", 1, "Yellow"),
-    ("The Overhang", 7, "White"),
-    ("Mantle Piece", 2, "Pink"),
-    ("Gaston Station", 5, "Red"),
-    ("Toe Hook Tango", 3, "Blue"),
+    ("Warm Welcome", 0, TagColor.RED, "Yellow"),
+    ("Crimp Lord", 4, TagColor.BLUE, "Red"),
+    ("Slab City", 2, TagColor.GREEN, "Blue"),
+    ("Dyno Might", 6, TagColor.PURPLE, "Black"),
+    ("Pinch Me", 3, TagColor.WHITE, "Green"),
+    ("Heel Yeah", 5, TagColor.BLACK, "Purple"),
+    ("Sloper Opera", 4, TagColor.WHITE, "Orange"),
+    ("Jug Life", 1, TagColor.YELLOW, "Pink"),
+    ("The Overhang", 7, TagColor.PINK, "White"),
+    ("Mantle Piece", 2, TagColor.YELLOW, "Pink"),
+    ("Gaston Station", 5, TagColor.PURPLE, "Red"),
+    ("Toe Hook Tango", 3, TagColor.GREEN, "Blue"),
 ]
 _SETTERS = ["Alex", "Sam", "Jordan", "Riley"]
 
@@ -109,14 +110,15 @@ def seed_repositories() -> Repositories:
         sections.append(section)
         # Alternate 2 and 3 climbs so tests and UI see both sizes.
         for i in range(2 + number % 2):
-            name, grade, color = next(names)
+            name, grade, tag, hold_color = next(names)
             climbs.append(
                 Climb(
                     id=f"s{number}c{i + 1}",
                     section_id=section.id,
                     name=name,
                     grade=grade,
-                    color=color,
+                    tag=tag,
+                    hold_color=hold_color,
                     setter=_SETTERS[(number + i) % len(_SETTERS)],
                     set_on=date(2026, 9, number + i),
                 )
