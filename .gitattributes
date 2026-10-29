@@ -1,0 +1,8 @@
+# Store text with LF line endings and check it out as LF on every OS, so Windows
+# machines and Linux CI produce identical files and no line-ending-only diffs.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary

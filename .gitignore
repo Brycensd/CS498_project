@@ -9,9 +9,13 @@ venv/
 .coverage
 htmlcov/
 
-# Flet build output
+# Flet build output and cache
 build/
 dist/
+.flet/
+
+# Secrets
+.env
 
 # Editors / OS
 .vscode/*

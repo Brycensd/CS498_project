@@ -1,0 +1,46 @@
+[project]
+name = "climbing-gym"
+version = "0.1.0"
+description = "Climbing gym app: browse sections and climbs, track ascents, comment."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "flet>=1.0,<2",
+]
+
+# Install with: python -m pip install --group dev   (needs pip >= 25.1)
+[dependency-groups]
+# What CI needs: the flet runtime (repeated from [project] because pip installs groups
+# without the project itself), pytest and ruff.
+test = [
+    "flet>=1.0,<2",
+    "pytest>=8",
+    "ruff>=0.6",
+]
+# Local development: adds the flet CLI (flet run / flet build) with the desktop and web
+# runners, plus pre-commit.
+dev = [
+    { include-group = "test" },
+    "flet[all]>=1.0,<2",
+    "pre-commit>=3",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+
+[tool.flet]
+org = "edu.cs498"
+product = "Climbing Gym"
+company = "CS498 Team"
+
+[tool.flet.app]
+path = "src"
