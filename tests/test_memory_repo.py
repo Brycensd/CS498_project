@@ -19,8 +19,7 @@ def test_seed_has_eight_numbered_sections_with_two_or_three_climbs():
 
 def test_seeded_grades_fall_inside_their_tag_range():
     for climb in seed_repositories().climbs.list_climbs():
-        low, high = climb.tag.grade_range
-        assert low <= climb.grade <= high, climb
+        assert climb.tag.covers(climb.grade), climb
 
 
 def test_lookups_by_id():

@@ -85,7 +85,7 @@ _PLACEHOLDER_CLIMBS = [
     ("Heel Yeah", 5, TagColor.BLACK, "Purple"),
     ("Sloper Opera", 4, TagColor.WHITE, "Orange"),
     ("Jug Life", 1, TagColor.YELLOW, "Pink"),
-    ("The Overhang", 7, TagColor.PINK, "White"),
+    ("The Overhang", 8, TagColor.PINK, "White"),
     ("Mantle Piece", 2, TagColor.YELLOW, "Pink"),
     ("Gaston Station", 5, TagColor.PURPLE, "Red"),
     ("Toe Hook Tango", 3, TagColor.GREEN, "Blue"),

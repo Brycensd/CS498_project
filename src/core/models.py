@@ -50,20 +50,26 @@ class TagColor(StrEnum):
     PINK = "Pink"
 
     @property
-    def grade_range(self) -> tuple[int, int]:
-        """Inclusive (lowest, highest) V-grade this tag covers."""
+    def grade_range(self) -> tuple[int, int | None]:
+        """Inclusive (lowest, highest) V-grade this tag covers; highest is None if open-ended."""
         return TAG_GRADE_RANGES[self]
 
     @property
     def range_label(self) -> str:
         low, high = self.grade_range
+        if high is None:
+            return f"V{low}+"
         return f"V{low}" if low == high else f"V{low}–V{high}"
 
+    def covers(self, grade: int) -> bool:
+        low, high = self.grade_range
+        return low <= grade and (high is None or grade <= high)
 
-# Red is V0 and Yellow V0–V2 per the gym. Assumption: every later tag also spans three
-# grades and starts one grade higher than the previous tag (Green V1–V3 ... Pink V7–V9).
+
+# Red, Yellow, Green and Pink are from the gym. Assumption: White through Orange continue
+# the pattern of three grades, each starting one grade higher than the previous tag.
 # Correct this table if the gym's chart differs; nothing else hard-codes the ranges.
-TAG_GRADE_RANGES: dict[TagColor, tuple[int, int]] = {
+TAG_GRADE_RANGES: dict[TagColor, tuple[int, int | None]] = {
     TagColor.RED: (0, 0),
     TagColor.YELLOW: (0, 2),
     TagColor.GREEN: (1, 3),
@@ -72,7 +78,7 @@ TAG_GRADE_RANGES: dict[TagColor, tuple[int, int]] = {
     TagColor.BLACK: (4, 6),
     TagColor.PURPLE: (5, 7),
     TagColor.ORANGE: (6, 8),
-    TagColor.PINK: (7, 9),
+    TagColor.PINK: (8, None),  # V8 and harder
 }
 
 
