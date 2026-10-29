@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 
 from core.memory_repo import DEMO_USER_ID, SECTION_COUNT, seed_repositories
-from core.models import Ascent, AscentStyle, Comment
+from core.models import Ascent, AscentStyle, Comment, TagColor
 
 
 def test_seed_has_eight_numbered_sections_with_two_or_three_climbs():
@@ -20,6 +20,11 @@ def test_seed_has_eight_numbered_sections_with_two_or_three_climbs():
 def test_seeded_grades_fall_inside_their_tag_range():
     for climb in seed_repositories().climbs.list_climbs():
         assert climb.tag.covers(climb.grade), climb
+
+
+def test_every_tag_has_at_least_one_climb():
+    tags = {c.tag for c in seed_repositories().climbs.list_climbs()}
+    assert tags == set(TagColor)
 
 
 def test_lookups_by_id():

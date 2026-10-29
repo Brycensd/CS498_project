@@ -149,14 +149,27 @@ def wall_photo(section: Section) -> ft.Control:
     )
 
 
+# On-screen color for each tag. Adjust a shade here to better match the physical tags.
+TAG_SWATCHES: dict[TagColor, ft.Colors] = {
+    TagColor.RED: ft.Colors.RED,
+    TagColor.YELLOW: ft.Colors.YELLOW,
+    TagColor.GREEN: ft.Colors.GREEN,
+    TagColor.WHITE: ft.Colors.WHITE,
+    TagColor.BLUE: ft.Colors.BLUE,
+    TagColor.BLACK: ft.Colors.BLACK,
+    TagColor.PURPLE: ft.Colors.PURPLE_800,  # darker than Material's default purple
+    TagColor.ORANGE: ft.Colors.ORANGE,
+    TagColor.PINK: ft.Colors.PINK,
+}
+
+
 def tag_chip(tag: TagColor, height: int = 18) -> ft.Control:
     """A small rectangle in the climb's difficulty-tag color, like the physical tag."""
     return ft.Container(
         width=height * 1.6,
         height=height,
         border_radius=4,
-        # Tag names ("Red", "Pink") are all Flet named colors.
-        bgcolor=getattr(ft.Colors, tag.name),
+        bgcolor=TAG_SWATCHES[tag],
         # The outline keeps black and white tags visible on dark and light themes.
         border=ft.Border.all(1, ft.Colors.OUTLINE),
         tooltip=f"{tag} tag ({tag.range_label})",

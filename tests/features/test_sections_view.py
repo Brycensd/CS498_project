@@ -52,6 +52,13 @@ def test_filter_with_no_matches_shows_message(ctx):
     assert screen.climb_list.controls[0].title.value == "No climbs match these filters"
 
 
+def test_every_tag_has_a_swatch():
+    from core.models import TagColor
+
+    assert set(view.TAG_SWATCHES) == set(TagColor)
+    assert view.TAG_SWATCHES[TagColor.PURPLE] == ft.Colors.PURPLE_800
+
+
 def test_section_without_photo_shows_placeholder():
     from core.models import Section
 

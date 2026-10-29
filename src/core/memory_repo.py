@@ -74,8 +74,9 @@ class InMemoryUserRepository:
         return list(self._users.values())
 
 
-# (name, grade, tag, hold color) placeholders, cycled through the sections. Hold colors
-# deliberately differ from tags so the UI shows they are independent.
+# (name, grade, tag, hold color) placeholders, cycled through the sections. Every tag is
+# used at least once, and hold colors deliberately differ from tags so the UI shows they
+# are independent.
 _PLACEHOLDER_CLIMBS = [
     ("Warm Welcome", 0, TagColor.RED, "Yellow"),
     ("Crimp Lord", 4, TagColor.BLUE, "Red"),
@@ -83,7 +84,7 @@ _PLACEHOLDER_CLIMBS = [
     ("Dyno Might", 6, TagColor.PURPLE, "Black"),
     ("Pinch Me", 3, TagColor.WHITE, "Green"),
     ("Heel Yeah", 5, TagColor.BLACK, "Purple"),
-    ("Sloper Opera", 4, TagColor.WHITE, "Orange"),
+    ("Sloper Opera", 7, TagColor.ORANGE, "Green"),
     ("Jug Life", 1, TagColor.YELLOW, "Pink"),
     ("The Overhang", 8, TagColor.PINK, "White"),
     ("Mantle Piece", 2, TagColor.YELLOW, "Pink"),
