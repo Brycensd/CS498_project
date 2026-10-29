@@ -1,0 +1,5 @@
+# Changes to these paths need approval from a code owner.
+# Add teammates' GitHub usernames here as core maintainers.
+/src/core/              @Brycensd
+/pyproject.toml         @Brycensd
+/.github/               @Brycensd
