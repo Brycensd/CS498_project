@@ -95,4 +95,4 @@ def test_copied_template_becomes_a_feature_without_edits(make_package, ctx):
 def test_real_features_load_without_errors():
     features, errors = discover_features()
     assert errors == []
-    assert "hello" in {f.id for f in features}
+    assert "sections" in {f.id for f in features}

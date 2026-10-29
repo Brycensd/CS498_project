@@ -23,7 +23,6 @@ src/
     app.py                wires everything together
   features/
     _template/            copy this to start a feature (ignored by discovery)
-    hello/                minimal demo feature
     sections/             section -> wall photo -> climb detail browsing
 tests/
   conftest.py             fake AppContext fixture (page=None, recording navigator)
@@ -132,7 +131,6 @@ app.
    `ClimbDetailRequested(climb_id)` in `core/events.py` that the sections feature handles,
    or (b) move "climb detail" into core as a shared view. Recommended: (a).
 3. **Tab bar on detail screens** - currently hidden (full-screen detail). Keep?
-4. **`hello` feature** - delete it once real features exist?
-5. **Data backend** - the in-memory repo resets every launch. When do we add persistence
+4. **Data backend** - the in-memory repo resets every launch. When do we add persistence
    (local SQLite vs. a server), and who owns it?
-6. **Python version** - the team should all use the same local version (3.12 recommended).
+5. **Python version** - the team should all use the same local version (3.12 recommended).
