@@ -33,8 +33,11 @@ In VS Code, pick `.venv\Scripts\python.exe` as the interpreter (Ctrl+Shift+P →
 flet run                 # desktop window
 flet run --web           # in a browser
 flet run -d -r           # desktop, hot reload on file changes
-flet run --android       # on a phone running the Flet app (scan the QR code)
+flet run --android -d -r # on a phone running the Flet app (scan the QR code)
 ```
+
+`-d -r` reloads the app whenever any file under `src/` is saved; without it only
+`main.py` is watched.
 
 The app has no persistent storage yet: every launch starts from the seeded in-memory data.
 
