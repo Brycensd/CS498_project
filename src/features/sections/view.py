@@ -1,0 +1,159 @@
+"""Section list, section screen (wall photo + filterable climbs) and climb detail screen."""
+
+from __future__ import annotations
+
+import flet as ft
+
+from core.context import AppContext
+from core.models import Climb, Section
+
+from . import logic
+
+ALL_COLORS = "all"
+
+
+def build_view(ctx: AppContext) -> ft.Control:
+    repo = ctx.repos.climbs
+    tiles = []
+    for section in repo.list_sections():
+        climbs = repo.list_climbs(section.id)
+        tiles.append(
+            ft.ListTile(
+                leading=ft.CircleAvatar(content=ft.Text(str(section.number))),
+                title=ft.Text(section.name),
+                subtitle=ft.Text(logic.section_summary(climbs)),
+                trailing=ft.Icon(ft.Icons.CHEVRON_RIGHT),
+                on_click=lambda _e, s=section: open_section(ctx, s),
+            )
+        )
+    return ft.ListView(expand=True, controls=tiles)
+
+
+def open_section(ctx: AppContext, section: Section) -> SectionScreen:
+    screen = SectionScreen(ctx, section)
+    ctx.nav.push(section.name, screen.control)
+    return screen
+
+
+def open_climb(ctx: AppContext, climb: Climb) -> None:
+    section = ctx.repos.climbs.get_section(climb.section_id)
+    rows = [
+        ft.ListTile(title=ft.Text(value), subtitle=ft.Text(label))
+        for label, value in logic.climb_details(climb, section)
+    ]
+    header = ft.Container(
+        padding=ft.Padding.symmetric(horizontal=16, vertical=8),
+        content=ft.Row(
+            [
+                hold_dot(climb.color, size=28),
+                ft.Text(climb.name, theme_style=ft.TextThemeStyle.HEADLINE_SMALL),
+            ]
+        ),
+    )
+    ctx.nav.push(
+        climb.name, ft.Column(expand=True, scroll=ft.ScrollMode.AUTO, controls=[header, *rows])
+    )
+
+
+class SectionScreen:
+    """Wall photo, sort/color controls and the matching climbs for one section."""
+
+    def __init__(self, ctx: AppContext, section: Section) -> None:
+        self._ctx = ctx
+        self._climbs = ctx.repos.climbs.list_climbs(section.id)
+
+        self.sort_dropdown = ft.Dropdown(
+            label="Sort",
+            expand=True,
+            value=logic.SortOrder.GRADE_ASC,
+            options=[
+                ft.DropdownOption(key=o, text=label) for o, label in logic.SORT_LABELS.items()
+            ],
+            on_select=lambda _e: self.refresh(),
+        )
+        self.color_dropdown = ft.Dropdown(
+            label="Hold color",
+            expand=True,
+            value=ALL_COLORS,
+            options=[ft.DropdownOption(key=ALL_COLORS, text="All colors")]
+            + [ft.DropdownOption(key=c, text=c) for c in logic.available_colors(self._climbs)],
+            on_select=lambda _e: self.refresh(),
+        )
+        self.climb_list = ft.Column(spacing=0)
+        self.control = ft.Column(
+            expand=True,
+            scroll=ft.ScrollMode.AUTO,
+            controls=[
+                wall_photo(section),
+                ft.Container(
+                    padding=ft.Padding.symmetric(horizontal=16, vertical=8),
+                    content=ft.Row([self.sort_dropdown, self.color_dropdown]),
+                ),
+                self.climb_list,
+            ],
+        )
+        self.refresh()
+
+    def visible_climbs(self) -> list[Climb]:
+        color = self.color_dropdown.value
+        colors = frozenset() if color in (None, ALL_COLORS) else frozenset({color})
+        matching = logic.filter_climbs(self._climbs, logic.ClimbFilter(colors=colors))
+        return logic.sort_climbs(matching, logic.SortOrder(self.sort_dropdown.value))
+
+    def refresh(self) -> None:
+        # Called from dropdown handlers; Flet re-renders automatically after a handler.
+        climbs = self.visible_climbs()
+        self.climb_list.controls = [self._climb_tile(c) for c in climbs] or [
+            ft.ListTile(title=ft.Text("No climbs match these filters"))
+        ]
+
+    def _climb_tile(self, climb: Climb) -> ft.Control:
+        return ft.ListTile(
+            leading=hold_dot(climb.color),
+            title=ft.Text(climb.name),
+            subtitle=ft.Text(f"{climb.grade_label} · set by {climb.setter}"),
+            trailing=ft.Icon(ft.Icons.CHEVRON_RIGHT),
+            on_click=lambda _e, c=climb: open_climb(self._ctx, c),
+        )
+
+
+WALL_PHOTO_HEIGHT = 220
+
+
+def wall_photo(section: Section) -> ft.Control:
+    placeholder = ft.Container(
+        expand=True,
+        alignment=ft.Alignment.CENTER,
+        bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
+        content=ft.Icon(ft.Icons.IMAGE_NOT_SUPPORTED, size=48),
+    )
+    content = placeholder
+    if section.wall_image:
+        content = ft.Image(
+            src=section.wall_image,
+            expand=True,
+            height=WALL_PHOTO_HEIGHT,
+            fit=ft.BoxFit.COVER,
+            semantics_label=f"{section.name} wall",
+            error_content=placeholder,
+        )
+    return ft.Container(
+        height=WALL_PHOTO_HEIGHT,
+        margin=ft.Margin.symmetric(horizontal=16),
+        border_radius=12,
+        clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
+        # An expanded child of a Row gets the full width, so COVER fills the box on any
+        # screen size instead of keeping the image's natural width.
+        content=ft.Row([content], spacing=0),
+    )
+
+
+def hold_dot(color: str, size: int = 20) -> ft.Control:
+    # Hold color names ("Red", "Blue") map onto Flet's named colors; unknown names show grey.
+    return ft.Container(
+        width=size,
+        height=size,
+        border_radius=size / 2,
+        bgcolor=getattr(ft.Colors, color.upper(), ft.Colors.GREY),
+        border=ft.Border.all(1, ft.Colors.OUTLINE),
+    )
