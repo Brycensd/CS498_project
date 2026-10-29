@@ -71,9 +71,6 @@ class TestSort:
             "arete",
         ]
 
-    def test_name_is_case_insensitive(self):
-        assert names(sort_climbs(CLIMBS, SortOrder.NAME)) == ["arete", "Balance", "Crimp", "Dyno"]
-
     def test_newest_first(self):
         assert names(sort_climbs(CLIMBS, SortOrder.NEWEST)) == [
             "Balance",

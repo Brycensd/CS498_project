@@ -12,14 +12,12 @@ from core.models import Climb, Section
 class SortOrder(StrEnum):
     GRADE_ASC = "grade_asc"
     GRADE_DESC = "grade_desc"
-    NAME = "name"
     NEWEST = "newest"
 
 
 SORT_LABELS: dict[SortOrder, str] = {
     SortOrder.GRADE_ASC: "Easiest",
     SortOrder.GRADE_DESC: "Hardest",
-    SortOrder.NAME: "Name",
     SortOrder.NEWEST: "Newest",
 }
 
@@ -50,9 +48,7 @@ def sort_climbs(climbs: Iterable[Climb], order: SortOrder) -> list[Climb]:
         return sorted(climbs, key=lambda c: (c.grade, c.name, c.id))
     if order is SortOrder.GRADE_DESC:
         return sorted(climbs, key=lambda c: (-c.grade, c.name, c.id))
-    if order is SortOrder.NEWEST:
-        return sorted(climbs, key=lambda c: (-c.set_on.toordinal(), c.name, c.id))
-    return sorted(climbs, key=lambda c: (c.name.casefold(), c.id))
+    return sorted(climbs, key=lambda c: (-c.set_on.toordinal(), c.name, c.id))  # NEWEST
 
 
 def available_hold_colors(climbs: Iterable[Climb]) -> list[str]:
