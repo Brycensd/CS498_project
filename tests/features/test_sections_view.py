@@ -18,7 +18,7 @@ def test_tapping_a_section_then_a_climb_pushes_two_screens(ctx):
     assert title == "Section 3"
     image = screen.controls[0].content.controls[0]
     assert isinstance(image, ft.Image)
-    assert image.src == "walls/section_3.png"
+    assert image.src == "walls/section_3.jpg"
 
     climb_list = screen.controls[2]
     climb_list.controls[0].on_click(None)

@@ -114,7 +114,7 @@ def seed_repositories() -> Repositories:
             gym_id=gym.id,
             number=number,
             name=f"Section {number}",
-            wall_image=f"walls/section_{number}.png",
+            wall_image=f"walls/section_{number}.jpg",
         )
         sections.append(section)
         # Alternate 2 and 3 climbs so tests and UI see both sizes.

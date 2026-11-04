@@ -14,7 +14,7 @@ def test_seed_has_eight_numbered_sections_with_two_or_three_climbs():
         climbs = repo.list_climbs(section.id)
         assert 2 <= len(climbs) <= 3
         assert all(c.section_id == section.id for c in climbs)
-        assert section.wall_image == f"walls/section_{section.number}.png"
+        assert section.wall_image == f"walls/section_{section.number}.jpg"
 
 
 def test_seeded_grades_fall_inside_their_tag_range():
