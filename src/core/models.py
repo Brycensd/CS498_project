@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import datetime
 from enum import StrEnum
 
 
@@ -86,15 +86,17 @@ TAG_GRADE_RANGES: dict[TagColor, tuple[int, int | None]] = {
 class Climb:
     id: str
     section_id: str
-    name: str
-    # Assumption: bouldering only, so grades are V-scale numbers (V0 = 0). Stored as int
-    # so sorting and range filters never re-parse strings. Revisit if rope grades are added.
+    # The proposed grade. Assumption: bouldering only, so grades are V-scale numbers (V0 = 0).
+    # Stored as int so sorting and range filters never re-parse strings. Revisit if rope
+    # grades are added.
     grade: int
     tag: TagColor  # difficulty tag; its range should contain `grade`
     hold_color: str  # any color, unrelated to the tag, e.g. "Pink"
-    setter: str
-    set_on: date
     image: str | None = None
+
+    @property
+    def title(self) -> str:
+        return f"{self.hold_color} holds"
 
     @property
     def grade_label(self) -> str:

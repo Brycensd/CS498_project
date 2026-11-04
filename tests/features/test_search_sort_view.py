@@ -13,9 +13,9 @@ def test_starts_with_every_climb_easiest_first(ctx):
 def test_typing_narrows_the_results(ctx):
     target = ctx.repos.climbs.list_climbs()[0]
     screen = view.SearchScreen(ctx)
-    screen.search_box.value = target.name
+    screen.search_box.value = target.title
     screen.search_box.on_change(None)
-    assert [tile.title.value for tile in screen.results.controls] == [target.name]
+    assert [tile.title.value for tile in screen.results.controls] == [target.title]
 
 
 def test_changing_the_sort_reorders_the_results(ctx):
@@ -36,9 +36,9 @@ def test_no_matches_shows_message(ctx):
 def test_tapping_a_result_pushes_its_detail_screen_and_keeps_the_search(ctx):
     target = ctx.repos.climbs.list_climbs()[0]
     screen = view.SearchScreen(ctx)
-    screen.search_box.value = target.name
+    screen.search_box.value = target.title
     screen.refresh()
     screen.results.controls[0].on_click(None)
     title, _ = ctx.nav.stack[-1]
-    assert title == target.name
-    assert screen.search_box.value == target.name
+    assert title == target.title
+    assert screen.search_box.value == target.title

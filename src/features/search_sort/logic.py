@@ -22,11 +22,11 @@ SORT_LABELS: dict[SortOrder, str] = {
 
 
 def matches(climb: Climb, query: str) -> bool:
-    """Case-insensitive match on name, setter, tag and hold color.
+    """Case-insensitive match on title, tag and hold color.
 
     Grade and section are left out on purpose: "3" would match both V3 and Section 3.
     """
-    text = f"{climb.name} {climb.setter} {climb.tag} {climb.hold_color}".lower()
+    text = f"{climb.title} {climb.tag} {climb.hold_color}".lower()
     return query.strip().lower() in text
 
 
@@ -38,27 +38,24 @@ def search_climbs(
 ) -> list[Climb]:
     """Climbs matching query in the given order. sections maps section id to Section."""
     hits = [c for c in climbs if matches(c, query)]
-    # Ties are broken by name (then id) so the list order never jumps around.
+    # Ties are broken by title (then id) so the list order never jumps around.
     if order is SortOrder.GRADE_ASC:
-        return sorted(hits, key=lambda c: (c.grade, c.name, c.id))
+        return sorted(hits, key=lambda c: (c.grade, c.title, c.id))
     if order is SortOrder.GRADE_DESC:
-        return sorted(hits, key=lambda c: (-c.grade, c.name, c.id))
-    return sorted(hits, key=lambda c: (sections[c.section_id].number, c.grade, c.name, c.id))
+        return sorted(hits, key=lambda c: (-c.grade, c.title, c.id))
+    return sorted(hits, key=lambda c: (sections[c.section_id].number, c.grade, c.title, c.id))
 
 
 def result_subtitle(climb: Climb, section: Section) -> str:
-    """Subtitle in the results list, e.g. "V5 · Section 3 · Blue tag"."""
-    return f"{climb.grade_label} · {section.name} · {climb.tag} tag"
+    """Subtitle in the results list, e.g. "Blue tag · Proposed V5 · Section 3"."""
+    return f"{climb.tag} tag · Proposed {climb.grade_label} · {section.name}"
 
 
 def climb_details(climb: Climb, section: Section) -> list[tuple[str, str]]:
     """(label, value) rows for the climb detail screen; the label is shown first."""
-    set_on = climb.set_on
     return [
-        ("Grade", climb.grade_label),
+        ("Proposed grade", climb.grade_label),
         ("Tag", f"{climb.tag} ({climb.tag.range_label})"),
         ("Hold color", climb.hold_color),
         ("Section", section.name),
-        ("Setter", climb.setter),
-        ("Set on", f"{set_on:%b} {set_on.day}, {set_on.year}"),
     ]

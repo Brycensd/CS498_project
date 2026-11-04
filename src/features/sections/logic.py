@@ -12,13 +12,11 @@ from core.models import Climb, Section
 class SortOrder(StrEnum):
     GRADE_ASC = "grade_asc"
     GRADE_DESC = "grade_desc"
-    NEWEST = "newest"
 
 
 SORT_LABELS: dict[SortOrder, str] = {
     SortOrder.GRADE_ASC: "Easiest",
     SortOrder.GRADE_DESC: "Hardest",
-    SortOrder.NEWEST: "Newest",
 }
 
 
@@ -43,12 +41,10 @@ def filter_climbs(climbs: Iterable[Climb], climb_filter: ClimbFilter) -> list[Cl
 
 
 def sort_climbs(climbs: Iterable[Climb], order: SortOrder) -> list[Climb]:
-    # Ties are broken by name (then id) so the list order never jumps around.
+    # Ties are broken by title (then id) so the list order never jumps around.
     if order is SortOrder.GRADE_ASC:
-        return sorted(climbs, key=lambda c: (c.grade, c.name, c.id))
-    if order is SortOrder.GRADE_DESC:
-        return sorted(climbs, key=lambda c: (-c.grade, c.name, c.id))
-    return sorted(climbs, key=lambda c: (-c.set_on.toordinal(), c.name, c.id))  # NEWEST
+        return sorted(climbs, key=lambda c: (c.grade, c.title, c.id))
+    return sorted(climbs, key=lambda c: (-c.grade, c.title, c.id))  # GRADE_DESC
 
 
 def available_hold_colors(climbs: Iterable[Climb]) -> list[str]:
@@ -72,18 +68,15 @@ def section_summary(climbs: list[Climb]) -> str:
 
 
 def climb_subtitle(climb: Climb) -> str:
-    """Subtitle in the climb list, e.g. "Grade V5 · Hold color Pink"."""
-    return f"Grade {climb.grade_label} · Hold color {climb.hold_color}"
+    """Subtitle in the climb list, e.g. "Green tag · Proposed V2"."""
+    return f"{climb.tag} tag · Proposed {climb.grade_label}"
 
 
 def climb_details(climb: Climb, section: Section | None) -> list[tuple[str, str]]:
     """(label, value) rows for the climb detail screen; the label is shown first."""
-    set_on = climb.set_on
     return [
-        ("Grade", climb.grade_label),
+        ("Proposed grade", climb.grade_label),
         ("Tag", f"{climb.tag} ({climb.tag.range_label})"),
         ("Hold color", climb.hold_color),
         ("Section", section.name if section else "Unknown"),
-        ("Setter", climb.setter),
-        ("Set on", f"{set_on:%b} {set_on.day}, {set_on.year}"),
     ]

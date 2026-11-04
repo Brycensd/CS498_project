@@ -1,5 +1,3 @@
-from datetime import date
-
 import pytest
 
 from core.models import Climb, Section, TagColor
@@ -17,20 +15,20 @@ from features.sections.logic import (
 )
 
 
-def climb(cid: str, name: str, grade: int, hold_color: str = "Red", day: int = 1) -> Climb:
-    return Climb(cid, "s1", name, grade, TagColor.BLUE, hold_color, "Sam", date(2026, 9, day))
+def climb(cid: str, grade: int, hold_color: str = "Red") -> Climb:
+    return Climb(cid, "s1", grade, TagColor.BLUE, hold_color)
 
 
 CLIMBS = [
-    climb("a", "Crimp", 4, "Red", day=3),
-    climb("b", "arete", 1, "Blue", day=5),
-    climb("c", "Dyno", 6, "Red", day=1),
-    climb("d", "Balance", 4, "Green", day=5),
+    climb("a", 4, "Red"),
+    climb("b", 1, "Blue"),
+    climb("c", 6, "Red"),
+    climb("d", 4, "Green"),
 ]
 
 
-def names(climbs: list[Climb]) -> list[str]:
-    return [c.name for c in climbs]
+def ids(climbs: list[Climb]) -> list[str]:
+    return [c.id for c in climbs]
 
 
 class TestFilter:
@@ -39,45 +37,27 @@ class TestFilter:
 
     def test_grade_range_is_inclusive(self):
         result = filter_climbs(CLIMBS, ClimbFilter(min_grade=4, max_grade=4))
-        assert names(result) == ["Crimp", "Balance"]
+        assert ids(result) == ["a", "d"]
 
     def test_open_ended_grade_bounds(self):
-        assert names(filter_climbs(CLIMBS, ClimbFilter(min_grade=5))) == ["Dyno"]
-        assert names(filter_climbs(CLIMBS, ClimbFilter(max_grade=1))) == ["arete"]
+        assert ids(filter_climbs(CLIMBS, ClimbFilter(min_grade=5))) == ["c"]
+        assert ids(filter_climbs(CLIMBS, ClimbFilter(max_grade=1))) == ["b"]
 
     def test_hold_colors(self):
         result = filter_climbs(CLIMBS, ClimbFilter(hold_colors=frozenset({"Red", "Green"})))
-        assert names(result) == ["Crimp", "Dyno", "Balance"]
+        assert ids(result) == ["a", "c", "d"]
 
     def test_filters_combine(self):
         result = filter_climbs(CLIMBS, ClimbFilter(min_grade=5, hold_colors=frozenset({"Red"})))
-        assert names(result) == ["Dyno"]
+        assert ids(result) == ["c"]
 
 
 class TestSort:
-    def test_grade_ascending_breaks_ties_by_name(self):
-        assert names(sort_climbs(CLIMBS, SortOrder.GRADE_ASC)) == [
-            "arete",
-            "Balance",
-            "Crimp",
-            "Dyno",
-        ]
+    def test_grade_ascending_breaks_ties_by_title(self):
+        assert ids(sort_climbs(CLIMBS, SortOrder.GRADE_ASC)) == ["b", "d", "a", "c"]
 
     def test_grade_descending(self):
-        assert names(sort_climbs(CLIMBS, SortOrder.GRADE_DESC)) == [
-            "Dyno",
-            "Balance",
-            "Crimp",
-            "arete",
-        ]
-
-    def test_newest_first(self):
-        assert names(sort_climbs(CLIMBS, SortOrder.NEWEST)) == [
-            "Balance",
-            "arete",
-            "Crimp",
-            "Dyno",
-        ]
+        assert ids(sort_climbs(CLIMBS, SortOrder.GRADE_DESC)) == ["c", "d", "a", "b"]
 
     def test_does_not_mutate_input(self):
         original = list(CLIMBS)
@@ -95,7 +75,7 @@ def test_available_hold_colors_are_unique_and_sorted():
 
 @pytest.mark.parametrize(
     ("climbs", "expected"),
-    [([], "No climbs"), ([climb("x", "X", 3)], "V3"), (CLIMBS, "V1–V6")],
+    [([], "No climbs"), ([climb("x", 3)], "V3"), (CLIMBS, "V1–V6")],
 )
 def test_grade_span(climbs, expected):
     assert grade_span(climbs) == expected
@@ -103,24 +83,22 @@ def test_grade_span(climbs, expected):
 
 def test_section_summary():
     assert section_summary(CLIMBS) == "4 climbs · V1–V6"
-    assert section_summary([climb("x", "X", 2)]) == "1 climb · V2"
+    assert section_summary([climb("x", 2)]) == "1 climb · V2"
     assert section_summary([]) == "No climbs"
 
 
-def test_climb_subtitle_puts_labels_before_values():
-    assert climb_subtitle(climb("x", "X", 5, "Pink")) == "Grade V5 · Hold color Pink"
+def test_climb_subtitle_shows_tag_and_proposed_grade():
+    assert climb_subtitle(climb("x", 5, "Pink")) == "Blue tag · Proposed V5"
 
 
 def test_climb_details():
     section = Section("s1", "g1", 1, "Section 1")
     rows = climb_details(CLIMBS[0], section)
-    assert [label for label, _ in rows][:3] == ["Grade", "Tag", "Hold color"]
+    assert [label for label, _ in rows][:3] == ["Proposed grade", "Tag", "Hold color"]
     assert dict(rows) == {
-        "Grade": "V4",
+        "Proposed grade": "V4",
         "Tag": "Blue (V3–V5)",
         "Hold color": "Red",
         "Section": "Section 1",
-        "Setter": "Sam",
-        "Set on": "Sep 3, 2026",
     }
     assert dict(climb_details(CLIMBS[0], None))["Section"] == "Unknown"

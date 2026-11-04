@@ -65,7 +65,7 @@ class SearchScreen:
     def _climb_tile(self, climb: Climb) -> ft.Control:
         section = self._sections[climb.section_id]
         return ft.ListTile(
-            title=ft.Text(climb.name),
+            title=ft.Text(climb.title),
             subtitle=ft.Text(logic.result_subtitle(climb, section)),
             trailing=ft.Icon(ft.Icons.CHEVRON_RIGHT),
             on_click=lambda _e, c=climb: self._open_climb(c),
@@ -78,5 +78,5 @@ class SearchScreen:
             for label, value in logic.climb_details(climb, self._sections[climb.section_id])
         ]
         self._ctx.nav.push(
-            climb.name, ft.Column(expand=True, scroll=ft.ScrollMode.AUTO, controls=rows)
+            climb.title, ft.Column(expand=True, scroll=ft.ScrollMode.AUTO, controls=rows)
         )

@@ -1,7 +1,7 @@
 # Climbing Gym
 
 An Android-first app for climbing gyms, written in Python with [Flet](https://flet.dev) 1.x.
-A gym has sections 1-8; each section has a wall photo and a set of climbs. Planned features:
+A gym has sections 1-4; each section has a wall photo and a set of climbs. Planned features:
 section/climb browsing, ascent tracking, comments and user profiles.
 
 See [docs/architecture.md](docs/architecture.md) for how the app is structured and

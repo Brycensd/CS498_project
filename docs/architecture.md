@@ -13,7 +13,7 @@ src/
   core/                   stable framework - changes need review (see CODEOWNERS)
     models.py             shared dataclasses: Gym, Section, Climb, Ascent, Comment, User
     repositories.py       repository interfaces (Protocols) + Repositories bundle
-    memory_repo.py        in-memory implementation, seeded with 8 sections
+    memory_repo.py        in-memory implementation, seeded with 4 sections
     events.py             EventBus (publish/subscribe by event type)
     navigation.py         Navigator: push/pop full-screen detail views
     context.py            AppContext handed to every feature
@@ -62,7 +62,7 @@ Features never import other features.
 ## Models
 
 Frozen dataclasses with string ids (so server UUIDs work later). Values are converted once
-when created: grades are `int` (V-scale), dates are `date`/`datetime`.
+when created: grades are `int` (V-scale), dates are `datetime`.
 
 Each climb has three separate difficulty/appearance fields:
 

@@ -5,9 +5,9 @@ import flet as ft
 from features.sections import view
 
 
-def test_section_list_shows_all_eight_sections(ctx):
+def test_section_list_shows_all_four_sections(ctx):
     root = view.build_view(ctx)
-    assert [tile.title.value for tile in root.controls] == [f"Section {n}" for n in range(1, 9)]
+    assert [tile.title.value for tile in root.controls] == [f"Section {n}" for n in range(1, 5)]
 
 
 def test_tapping_a_section_then_a_climb_pushes_two_screens(ctx):
@@ -24,8 +24,8 @@ def test_tapping_a_section_then_a_climb_pushes_two_screens(ctx):
     climb_list.controls[0].on_click(None)
     assert len(ctx.nav.stack) == 2
     climb_title, _ = ctx.nav.stack[-1]
-    expected = min(ctx.repos.climbs.list_climbs("s3"), key=lambda c: (c.grade, c.name))
-    assert climb_title == expected.name
+    expected = min(ctx.repos.climbs.list_climbs("s3"), key=lambda c: (c.grade, c.title))
+    assert climb_title == expected.title
 
 
 def test_section_screen_sorts_and_filters(ctx):

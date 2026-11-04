@@ -6,12 +6,10 @@ Data lives only for the lifetime of the process; every launch starts from the se
 from __future__ import annotations
 
 from collections import defaultdict
-from datetime import date
 
 from core.models import Ascent, Climb, Comment, Gym, Section, TagColor, User
 from core.repositories import Repositories
 
-SECTION_COUNT = 8
 DEMO_USER_ID = "u1"
 
 
@@ -74,41 +72,37 @@ class InMemoryUserRepository:
         return list(self._users.values())
 
 
-# (name, grade, tag, hold color) placeholders, cycled through the sections. Every tag is
-# used at least once, and hold colors deliberately differ from tags so the UI shows they
-# are independent.
-_PLACEHOLDER_CLIMBS = [
-    ("Warm Welcome", 0, TagColor.RED, "Yellow"),
-    ("Crimp Lord", 4, TagColor.BLUE, "Red"),
-    ("Slab City", 2, TagColor.GREEN, "Blue"),
-    ("Dyno Might", 6, TagColor.PURPLE, "Black"),
-    ("Pinch Me", 3, TagColor.WHITE, "Green"),
-    ("Heel Yeah", 5, TagColor.BLACK, "Purple"),
-    ("Sloper Opera", 7, TagColor.ORANGE, "Green"),
-    ("Jug Life", 1, TagColor.YELLOW, "Pink"),
-    ("Phases of Crimp", 8, TagColor.PINK, "White"),
-    ("Mantle Piece", 2, TagColor.YELLOW, "Pink"),
-    ("Gaston Station", 5, TagColor.PURPLE, "Red"),
-    ("Toe Hook Tango", 3, TagColor.GREEN, "Blue"),
-    ("Flag Day", 1, TagColor.GREEN, "Orange"),
-    ("Sidepull Sally", 4, TagColor.WHITE, "Yellow"),
-    ("Undercling Ring", 3, TagColor.BLUE, "Black"),
-    ("Campus Tour", 6, TagColor.BLACK, "White"),
-    ("Kneebar Hopping", 5, TagColor.BLUE, "Orange"),
-    ("Smear Campaign", 0, TagColor.YELLOW, "Purple"),
-    ("Match Point", 7, TagColor.PURPLE, "Blue"),
-    ("Roof Rack", 8, TagColor.ORANGE, "Red"),
-]
-_SETTERS = ["Alex", "Sam", "Jordan", "Riley"]
+# Section number -> (hold color, tag, proposed grade) placeholders for each climb on that
+# wall. Every tag is used at least once, and hold colors deliberately differ from tags so
+# the UI shows they are independent.
+_SECTION_CLIMBS: dict[int, list[tuple[str, TagColor, int]]] = {
+    1: [
+        ("Yellow", TagColor.RED, 0),
+        ("Red", TagColor.BLUE, 4),
+        ("Blue", TagColor.GREEN, 2),
+    ],
+    2: [
+        ("Black", TagColor.PURPLE, 6),
+        ("Green", TagColor.WHITE, 3),
+    ],
+    3: [
+        ("Purple", TagColor.BLACK, 5),
+        ("Green", TagColor.ORANGE, 7),
+        ("Pink", TagColor.YELLOW, 1),
+    ],
+    4: [
+        ("White", TagColor.PINK, 8),
+        ("Pink", TagColor.YELLOW, 2),
+    ],
+}
 
 
 def seed_repositories() -> Repositories:
-    """Build repositories with 8 sections and 2-3 placeholder climbs each."""
+    """Build repositories with the sections and placeholder climbs in _SECTION_CLIMBS."""
     gym = Gym(id="g1", name="Demo Gym")
     sections: list[Section] = []
     climbs: list[Climb] = []
-    placeholders = iter(_PLACEHOLDER_CLIMBS)
-    for number in range(1, SECTION_COUNT + 1):
+    for number, section_climbs in _SECTION_CLIMBS.items():
         section = Section(
             id=f"s{number}",
             gym_id=gym.id,
@@ -117,19 +111,14 @@ def seed_repositories() -> Repositories:
             wall_image=f"walls/section_{number}.jpg",
         )
         sections.append(section)
-        # Alternate 2 and 3 climbs so tests and UI see both sizes.
-        for i in range(2 + number % 2):
-            name, grade, tag, hold_color = name, grade, tag, hold_color = next(placeholders)
+        for i, (hold_color, tag, grade) in enumerate(section_climbs):
             climbs.append(
                 Climb(
                     id=f"s{number}c{i + 1}",
                     section_id=section.id,
-                    name=name,
                     grade=grade,
                     tag=tag,
                     hold_color=hold_color,
-                    setter=_SETTERS[(number + i) % len(_SETTERS)],
-                    set_on=date(2026, 9, number + i),
                 )
             )
     users = [User(id=DEMO_USER_ID, display_name="Demo Climber")]

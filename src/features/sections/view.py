@@ -37,7 +37,7 @@ def open_section(ctx: AppContext, section: Section) -> SectionScreen:
 
 def open_climb(ctx: AppContext, climb: Climb) -> None:
     section = ctx.repos.climbs.get_section(climb.section_id)
-    # Label first, value after it on the same line: "Grade      V5".
+    # Label first, value after it on the same line: "Proposed grade      V5".
     rows = [
         ft.ListTile(title=ft.Text(label), trailing=ft.Text(value, size=16))
         for label, value in logic.climb_details(climb, section)
@@ -47,12 +47,12 @@ def open_climb(ctx: AppContext, climb: Climb) -> None:
         content=ft.Row(
             [
                 tag_chip(climb.tag, height=24),
-                ft.Text(climb.name, theme_style=ft.TextThemeStyle.HEADLINE_SMALL),
+                ft.Text(climb.title, theme_style=ft.TextThemeStyle.HEADLINE_SMALL),
             ]
         ),
     )
     ctx.nav.push(
-        climb.name, ft.Column(expand=True, scroll=ft.ScrollMode.AUTO, controls=[header, *rows])
+        climb.title, ft.Column(expand=True, scroll=ft.ScrollMode.AUTO, controls=[header, *rows])
     )
 
 
@@ -111,7 +111,7 @@ class SectionScreen:
     def _climb_tile(self, climb: Climb) -> ft.Control:
         return ft.ListTile(
             leading=tag_chip(climb.tag),
-            title=ft.Text(climb.name),
+            title=ft.Text(climb.title),
             subtitle=ft.Text(logic.climb_subtitle(climb)),
             trailing=ft.Icon(ft.Icons.CHEVRON_RIGHT),
             on_click=lambda _e, c=climb: open_climb(self._ctx, c),
