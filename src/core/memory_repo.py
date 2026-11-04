@@ -86,10 +86,18 @@ _PLACEHOLDER_CLIMBS = [
     ("Heel Yeah", 5, TagColor.BLACK, "Purple"),
     ("Sloper Opera", 7, TagColor.ORANGE, "Green"),
     ("Jug Life", 1, TagColor.YELLOW, "Pink"),
-    ("The Overhang", 8, TagColor.PINK, "White"),
+    ("Phases of Crimp", 8, TagColor.PINK, "White"),
     ("Mantle Piece", 2, TagColor.YELLOW, "Pink"),
     ("Gaston Station", 5, TagColor.PURPLE, "Red"),
     ("Toe Hook Tango", 3, TagColor.GREEN, "Blue"),
+    ("Flag Day", 1, TagColor.GREEN, "Orange"),
+    ("Sidepull Sally", 4, TagColor.WHITE, "Yellow"),
+    ("Undercling Ring", 3, TagColor.BLUE, "Black"),
+    ("Campus Tour", 6, TagColor.BLACK, "White"),
+    ("Kneebar Hopping", 5, TagColor.BLUE, "Orange"),
+    ("Smear Campaign", 0, TagColor.YELLOW, "Purple"),
+    ("Match Point", 7, TagColor.PURPLE, "Blue"),
+    ("Roof Rack", 8, TagColor.ORANGE, "Red"),
 ]
 _SETTERS = ["Alex", "Sam", "Jordan", "Riley"]
 
@@ -99,7 +107,7 @@ def seed_repositories() -> Repositories:
     gym = Gym(id="g1", name="Demo Gym")
     sections: list[Section] = []
     climbs: list[Climb] = []
-    names = iter(_PLACEHOLDER_CLIMBS * 2)
+    placeholders = iter(_PLACEHOLDER_CLIMBS)
     for number in range(1, SECTION_COUNT + 1):
         section = Section(
             id=f"s{number}",
@@ -111,7 +119,7 @@ def seed_repositories() -> Repositories:
         sections.append(section)
         # Alternate 2 and 3 climbs so tests and UI see both sizes.
         for i in range(2 + number % 2):
-            name, grade, tag, hold_color = next(names)
+            name, grade, tag, hold_color = name, grade, tag, hold_color = next(placeholders)
             climbs.append(
                 Climb(
                     id=f"s{number}c{i + 1}",

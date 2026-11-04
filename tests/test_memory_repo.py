@@ -63,3 +63,8 @@ def test_demo_user_exists():
     users = seed_repositories().users
     assert users.get(DEMO_USER_ID).display_name
     assert users.get("nobody") is None
+
+
+def test_seeded_climb_names_are_unique():
+    names = [c.name for c in seed_repositories().climbs.list_climbs()]
+    assert len(names) == len(set(names))
