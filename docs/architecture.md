@@ -9,11 +9,13 @@ team should confirm. Code lives in `src/` (the `flet create` layout); tests live
 pyproject.toml            dependencies, pytest/ruff config, flet build config
 src/
   main.py                 entry point: ft.run(core.app.main)
-  assets/                 icon.png, walls/section_N.png (placeholder wall photos)
+  assets/                 icon.png, walls/ (wall photos), avatars/ (profile pictures)
   core/                   stable framework - changes need review (see CODEOWNERS)
-    models.py             shared dataclasses: Gym, Section, Climb, Ascent, Comment, User
+    models.py             shared dataclasses: Gym, Section, Climb, Ascent, Comment, User,
+                          NewsPost
     repositories.py       repository interfaces (Protocols) + Repositories bundle
-    memory_repo.py        in-memory implementation, seeded with 4 sections
+    memory_repo.py        in-memory implementation, seeded with 4 sections, a demo user,
+                          their sends and one news post
     events.py             EventBus (publish/subscribe by event type)
     navigation.py         Navigator: push/pop full-screen detail views
     context.py            AppContext handed to every feature
@@ -23,7 +25,9 @@ src/
     app.py                wires everything together
   features/
     _template/            copy this to start a feature (ignored by discovery)
+    home/                 profile summary (name, picture, hardest send) and gym news
     sections/             section -> wall photo -> climb detail browsing
+    search_sort/          search every climb, sort, jump to its section
 tests/
   conftest.py             fake AppContext fixture (page=None, recording navigator)
   test_*.py               core tests + smoke test over every feature
@@ -42,6 +46,10 @@ FEATURE = Feature(id=..., title=..., icon=ft.Icons.X, build_view=build_view, ord
 returned control in the body area; features never touch `page.navigation_bar`, `page.views`
 or page layout.
 
+Optionally, `Feature(..., setup=setup)` gives a `setup(ctx)` hook that the shell runs once
+at startup, before any view is built and whether or not the tab is ever opened. Subscribe
+to events there, not in `build_view`, which runs again on every tab switch.
+
 Inside the package:
 
 - `logic.py` - pure Python, **no flet imports**, unit tested.
@@ -53,7 +61,7 @@ Features never import other features.
 
 | Field          | Purpose                                                                 |
 |----------------|-------------------------------------------------------------------------|
-| `repos`        | `Repositories(climbs, ascents, comments, users)` - all data access      |
+| `repos`        | `Repositories(climbs, ascents, comments, users, news)` - all data access |
 | `events`       | `EventBus` for cross-feature notifications                              |
 | `nav`          | `Navigator.push(title, control)` / `pop()` for drill-down screens       |
 | `current_user` | the signed-in `User` (a seeded demo user for now)                       |
@@ -62,7 +70,8 @@ Features never import other features.
 ## Models
 
 Frozen dataclasses with string ids (so server UUIDs work later). Values are converted once
-when created: grades are `int` (V-scale), dates are `datetime`.
+when created: grades are `int` (V-scale), moments are `datetime` and calendar days (such
+as an event day) are `date`.
 
 Each climb has three separate difficulty/appearance fields:
 
@@ -131,7 +140,7 @@ app.
    `ClimbDetailRequested(climb_id)` in `core/events.py` that the sections feature handles,
    or (b) move "climb detail" into core as a shared view. Recommended: (a). The search
    feature's View Section button already works this way: it publishes `SectionRequested`,
-   and the sections feature opens the page.
+   and the sections feature, which subscribes in its `setup` hook, opens the page.
 3. **Tab bar on detail screens** - currently hidden (full-screen detail). Keep?
 4. **Data backend** - the in-memory repo resets every launch. When do we add persistence
    (local SQLite vs. a server), and who owns it?
