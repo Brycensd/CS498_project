@@ -2,6 +2,7 @@
 
 import flet as ft
 
+from core.events import SectionRequested
 from features.sections import logic, view
 
 
@@ -30,6 +31,23 @@ def test_tapping_a_section_then_a_climb_pushes_two_screens(ctx):
     rows = {tile.title.value: tile.trailing.value for tile in detail.controls[1:]}
     section = ctx.repos.climbs.get_section("s3")
     assert rows == dict(logic.climb_details(expected, section))
+
+
+def test_section_request_opens_that_section_once_after_rebuilds(ctx):
+    view.build_view(ctx)
+    view.build_view(ctx)  # Tab switches rebuild the view.
+
+    ctx.events.publish(SectionRequested("s3"))
+
+    assert [title for title, _ in ctx.nav.stack] == ["Section 3"]
+
+
+def test_request_for_unknown_section_opens_nothing(ctx):
+    view.build_view(ctx)
+
+    ctx.events.publish(SectionRequested("missing"))
+
+    assert ctx.nav.stack == []
 
 
 def test_section_screen_sorts_and_filters(ctx):

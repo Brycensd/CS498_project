@@ -129,7 +129,9 @@ app.
 2. **Cross-feature navigation** - e.g. the ascents feature opening a climb detail page.
    Features can't import each other. Options: (a) a shared event such as
    `ClimbDetailRequested(climb_id)` in `core/events.py` that the sections feature handles,
-   or (b) move "climb detail" into core as a shared view. Recommended: (a).
+   or (b) move "climb detail" into core as a shared view. Recommended: (a). The search
+   feature's View Section button already works this way: it publishes `SectionRequested`,
+   and the sections feature opens the page.
 3. **Tab bar on detail screens** - currently hidden (full-screen detail). Keep?
 4. **Data backend** - the in-memory repo resets every launch. When do we add persistence
    (local SQLite vs. a server), and who owns it?
