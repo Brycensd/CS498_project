@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
-from core.models import Ascent, Climb, Comment, Gym, Section, User
+from core.models import Ascent, Climb, Comment, Gym, NewsPost, Section, User
 
 
 class ClimbRepository(Protocol):
@@ -52,9 +52,18 @@ class UserRepository(Protocol):
     def list_users(self) -> list[User]: ...
 
 
+class NewsRepository(Protocol):
+    """Gym news. Read-only for now; add/edit/delete arrive with the admin system."""
+
+    def list_posts(self) -> list[NewsPost]:
+        """Posts newest first."""
+        ...
+
+
 @dataclass(frozen=True)
 class Repositories:
     climbs: ClimbRepository
     ascents: AscentRepository
     comments: CommentRepository
     users: UserRepository
+    news: NewsRepository

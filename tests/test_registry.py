@@ -96,3 +96,4 @@ def test_real_features_load_without_errors():
     features, errors = discover_features()
     assert errors == []
     assert "sections" in {f.id for f in features}
+    assert features[0].id == "home"  # the app opens on the home page

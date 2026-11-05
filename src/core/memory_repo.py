@@ -6,8 +6,19 @@ Data lives only for the lifetime of the process; every launch starts from the se
 from __future__ import annotations
 
 from collections import defaultdict
+from datetime import UTC, date, datetime
 
-from core.models import Ascent, Climb, Comment, Gym, Section, TagColor, User
+from core.models import (
+    Ascent,
+    AscentStyle,
+    Climb,
+    Comment,
+    Gym,
+    NewsPost,
+    Section,
+    TagColor,
+    User,
+)
 from core.repositories import Repositories
 
 DEMO_USER_ID = "u1"
@@ -72,6 +83,14 @@ class InMemoryUserRepository:
         return list(self._users.values())
 
 
+class InMemoryNewsRepository:
+    def __init__(self, posts: list[NewsPost]) -> None:
+        self._posts = list(posts)
+
+    def list_posts(self) -> list[NewsPost]:
+        return sorted(self._posts, key=lambda p: p.posted_at, reverse=True)
+
+
 # Section number -> (hold color, tag, grade) placeholders for each climb on that wall.
 # Every tag is used at least once. A hold color can repeat within a section, so hold color
 # and tag together tell its climbs apart.
@@ -105,9 +124,31 @@ _SECTION_CLIMBS: dict[int, list[tuple[str, TagColor, int]]] = {
     ],
 }
 
+# Placeholder sends for the demo user as (climb id, style, day in October 2026), so the home
+# page has a hardest send to show. Sections 1 and 4 hold the gym's V8s.
+_DEMO_ASCENTS: list[tuple[str, AscentStyle, int]] = [
+    ("s2c3", AscentStyle.FLASH, 3),
+    ("s3c1", AscentStyle.SEND, 10),
+    ("s1c5", AscentStyle.SEND, 17),
+    ("s4c2", AscentStyle.FLASH, 24),
+]
+
+_NEWS = [
+    NewsPost(
+        id="n1",
+        title="Anniversary Party",
+        body=(
+            "Celebrate the gym's anniversary with us: a community comp, fresh sets on every "
+            "wall, food and prizes. All levels welcome."
+        ),
+        posted_at=datetime(2026, 11, 1, 9, 0, tzinfo=UTC),
+        event_on=date(2026, 11, 7),
+    ),
+]
+
 
 def seed_repositories() -> Repositories:
-    """Build repositories with the sections and placeholder climbs in _SECTION_CLIMBS."""
+    """Build repositories with the placeholder climbs, demo user, sends and news above."""
     gym = Gym(id="g1", name="Demo Gym")
     sections: list[Section] = []
     climbs: list[Climb] = []
@@ -130,10 +171,22 @@ def seed_repositories() -> Repositories:
                     hold_color=hold_color,
                 )
             )
-    users = [User(id=DEMO_USER_ID, display_name="Demo Climber")]
+    users = [User(id=DEMO_USER_ID, display_name="Daniel Woods", avatar="avatars/daniel_woods.png")]
+    ascents = InMemoryAscentRepository()
+    for i, (climb_id, style, day) in enumerate(_DEMO_ASCENTS, start=1):
+        ascents.add(
+            Ascent(
+                id=f"a{i}",
+                user_id=DEMO_USER_ID,
+                climb_id=climb_id,
+                style=style,
+                climbed_at=datetime(2026, 10, day, 18, 0, tzinfo=UTC),
+            )
+        )
     return Repositories(
         climbs=InMemoryClimbRepository(gym, sections, climbs),
-        ascents=InMemoryAscentRepository(),
+        ascents=ascents,
         comments=InMemoryCommentRepository(),
         users=InMemoryUserRepository(users),
+        news=InMemoryNewsRepository(_NEWS),
     )

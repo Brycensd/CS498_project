@@ -4,7 +4,7 @@ import flet as ft
 
 from core.feature import Feature
 
-from .view import build_view
+from .view import build_view, setup
 
 FEATURE = Feature(
     id="sections",
@@ -12,4 +12,5 @@ FEATURE = Feature(
     icon=ft.Icons.TERRAIN,
     build_view=build_view,
     order=10,
+    setup=setup,
 )

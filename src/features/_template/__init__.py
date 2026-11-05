@@ -10,6 +10,7 @@ To create a feature:
 
 Rules: never import another feature, never change page layout or page.navigation_bar,
 use ctx.nav.push(...) for detail screens and ctx.show_message(...) for snackbars.
+Subscribe to events in a setup(ctx) hook (Feature(..., setup=setup)), not in build_view.
 """
 
 import flet as ft
