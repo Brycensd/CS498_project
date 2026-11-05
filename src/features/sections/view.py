@@ -2,27 +2,23 @@
 
 from __future__ import annotations
 
-from weakref import WeakSet
-
 import flet as ft
 
 from core.context import AppContext
-from core.events import EventBus, SectionRequested
+from core.events import SectionRequested
 from core.models import Climb, Section, TagColor
 
 from . import logic
 
 ALL_COLORS = "all"
 
-# build_view runs on every tab switch, so this keeps each bus from getting the handler
-# more than once, which would open the requested section several times.
-_subscribed_buses: WeakSet[EventBus] = WeakSet()
+
+def setup(ctx: AppContext) -> None:
+    """Open a section whenever another feature asks for one, even if this tab never opened."""
+    ctx.events.subscribe(SectionRequested, lambda event: _on_section_requested(ctx, event))
 
 
 def build_view(ctx: AppContext) -> ft.Control:
-    if ctx.events not in _subscribed_buses:
-        _subscribed_buses.add(ctx.events)
-        ctx.events.subscribe(SectionRequested, lambda event: _on_section_requested(ctx, event))
     repo = ctx.repos.climbs
     tiles = []
     for section in repo.list_sections():

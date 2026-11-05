@@ -14,6 +14,20 @@ from core.registry import LoadError
 log = logging.getLogger(__name__)
 
 
+def run_feature_setup(feature: Feature, ctx: AppContext) -> None:
+    """Run a feature's optional startup hook, logging a crash instead of raising.
+
+    A failed setup only loses what that hook did (e.g. an event subscription); the feature's
+    tab is still shown, and build_view reports its own errors.
+    """
+    if feature.setup is None:
+        return
+    try:
+        feature.setup(ctx)
+    except Exception:
+        log.exception("Feature %r failed to set up", feature.id)
+
+
 def build_feature_view(feature: Feature, ctx: AppContext) -> ft.Control:
     """Build a feature's view, replacing a crash with an error panel."""
     try:
@@ -55,6 +69,9 @@ class AppShell:
         root.route = ROOT_ROUTE
         root.padding = 0
         root.controls = [ft.SafeArea(expand=True, content=self._body)]
+
+        for feature in self._features:
+            run_feature_setup(feature, self._ctx)
 
         # Flutter's NavigationBar needs at least 2 destinations, so with a single
         # feature we skip the bar and let that feature fill the page.

@@ -33,7 +33,17 @@ def test_tapping_a_section_then_a_climb_pushes_two_screens(ctx):
     assert rows == dict(logic.climb_details(expected, section))
 
 
+def test_section_request_works_before_the_sections_tab_is_opened(ctx):
+    # Home is the first tab, so build_view may never have run when Search asks for a section.
+    view.setup(ctx)
+
+    ctx.events.publish(SectionRequested("s3"))
+
+    assert [title for title, _ in ctx.nav.stack] == ["Section 3"]
+
+
 def test_section_request_opens_that_section_once_after_rebuilds(ctx):
+    view.setup(ctx)
     view.build_view(ctx)
     view.build_view(ctx)  # Tab switches rebuild the view.
 
@@ -43,7 +53,7 @@ def test_section_request_opens_that_section_once_after_rebuilds(ctx):
 
 
 def test_request_for_unknown_section_opens_nothing(ctx):
-    view.build_view(ctx)
+    view.setup(ctx)
 
     ctx.events.publish(SectionRequested("missing"))
 

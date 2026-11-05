@@ -19,3 +19,7 @@ class Feature:
     icon: ft.IconData  # e.g. ft.Icons.TERRAIN
     build_view: Callable[[AppContext], ft.Control]
     order: int = 100  # tab position; lower comes first, ties sorted by title
+    # Optional. Called once at startup, before any view is built, whether or not the tab is
+    # ever opened. Use it for work like subscribing to events; build_view runs on every
+    # tab switch, so subscribing there would add a handler each time.
+    setup: Callable[[AppContext], None] | None = None

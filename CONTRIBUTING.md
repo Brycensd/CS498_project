@@ -17,6 +17,10 @@ Read [docs/architecture.md](docs/architecture.md) first. Setup steps are in the
    - `ctx.show_message(text)` for a snackbar,
    - `ctx.events` to notify or listen to other features,
    - `ctx.current_user` for the signed-in user.
+
+   To subscribe to events, add a `setup(ctx)` function and pass `setup=setup` to
+   `Feature(...)`. It runs once at startup; `build_view` runs on every tab switch, so
+   subscribing there would add a handler each time.
 5. Add tests in `tests/features/test_<name>_logic.py`. The `ctx` fixture in
    `tests/conftest.py` gives you a UI-free context with seeded data and a
    `RecordingNavigator`, so you can also check that tapping something pushes a screen.

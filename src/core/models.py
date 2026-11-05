@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 from enum import StrEnum
 
 
@@ -130,3 +130,18 @@ class Comment:
 class User:
     id: str
     display_name: str
+    # Profile picture: an asset path (e.g. "avatars/daniel_woods.png") or a URL, like
+    # Section.wall_image. None means no picture; the UI shows initials instead.
+    avatar: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class NewsPost:
+    """A gym announcement shown on the home page. Admins will create these later."""
+
+    id: str
+    title: str
+    body: str
+    posted_at: datetime
+    # The day of the event the post announces, if it announces one.
+    event_on: date | None = None

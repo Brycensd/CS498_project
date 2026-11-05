@@ -1,7 +1,15 @@
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
+from pathlib import Path
 
-from core.memory_repo import DEMO_USER_ID, seed_repositories
-from core.models import Ascent, AscentStyle, Climb, Comment, TagColor
+from core.memory_repo import (
+    DEMO_USER_ID,
+    InMemoryAscentRepository,
+    InMemoryNewsRepository,
+    seed_repositories,
+)
+from core.models import Ascent, AscentStyle, Climb, Comment, NewsPost, TagColor
+
+ASSETS = Path(__file__).resolve().parents[1] / "src" / "assets"
 
 
 def test_seed_has_four_numbered_sections_that_all_have_climbs():
@@ -38,13 +46,34 @@ def test_lookups_by_id():
 
 
 def test_ascents_filter_by_user_and_climb():
-    repos = seed_repositories()
+    ascents = InMemoryAscentRepository()
     now = datetime(2026, 10, 1, tzinfo=UTC)
-    repos.ascents.add(Ascent("a1", DEMO_USER_ID, "s1c1", AscentStyle.FLASH, now))
-    repos.ascents.add(Ascent("a2", "other", "s1c1", AscentStyle.SEND, now))
+    ascents.add(Ascent("a1", DEMO_USER_ID, "s1c1", AscentStyle.FLASH, now))
+    ascents.add(Ascent("a2", "other", "s1c1", AscentStyle.SEND, now))
 
-    assert [a.id for a in repos.ascents.list_for_user(DEMO_USER_ID)] == ["a1"]
-    assert [a.id for a in repos.ascents.list_for_climb("s1c1")] == ["a1", "a2"]
+    assert [a.id for a in ascents.list_for_user(DEMO_USER_ID)] == ["a1"]
+    assert [a.id for a in ascents.list_for_climb("s1c1")] == ["a1", "a2"]
+
+
+def test_demo_user_starts_with_sends_of_real_climbs():
+    repos = seed_repositories()
+    sends = repos.ascents.list_for_user(DEMO_USER_ID)
+    assert sends
+    assert all(repos.climbs.get_climb(a.climb_id) is not None for a in sends)
+
+
+def test_news_is_seeded_with_the_anniversary_post():
+    posts = seed_repositories().news.list_posts()
+    assert posts[0].title == "Anniversary Party"
+    assert posts[0].event_on == date(2026, 11, 7)
+
+
+def test_news_is_listed_newest_first():
+    def post(pid: str, day: int) -> NewsPost:
+        return NewsPost(pid, pid, "", datetime(2026, 11, day, tzinfo=UTC))
+
+    news = InMemoryNewsRepository([post("old", 1), post("new", 3), post("mid", 2)])
+    assert [p.id for p in news.list_posts()] == ["new", "mid", "old"]
 
 
 def test_comments_are_returned_oldest_first():
@@ -58,9 +87,11 @@ def test_comments_are_returned_oldest_first():
     assert repos.comments.list_for_climb("s2c1") == []
 
 
-def test_demo_user_exists():
+def test_demo_user_exists_with_a_picture_on_disk():
     users = seed_repositories().users
-    assert users.get(DEMO_USER_ID).display_name
+    user = users.get(DEMO_USER_ID)
+    assert user.display_name == "Daniel Woods"
+    assert (ASSETS / user.avatar).is_file()
     assert users.get("nobody") is None
 
 
