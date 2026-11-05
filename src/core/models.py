@@ -86,9 +86,8 @@ TAG_GRADE_RANGES: dict[TagColor, tuple[int, int | None]] = {
 class Climb:
     id: str
     section_id: str
-    # The proposed grade. Assumption: bouldering only, so grades are V-scale numbers (V0 = 0).
-    # Stored as int so sorting and range filters never re-parse strings. Revisit if rope
-    # grades are added.
+    # Assumption: bouldering only, so grades are V-scale numbers (V0 = 0). Stored as int
+    # so sorting and range filters never re-parse strings. Revisit if rope grades are added.
     grade: int
     tag: TagColor  # difficulty tag; its range should contain `grade`
     hold_color: str  # any color, unrelated to the tag, e.g. "Pink"

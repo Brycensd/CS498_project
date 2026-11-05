@@ -68,14 +68,14 @@ def section_summary(climbs: list[Climb]) -> str:
 
 
 def climb_subtitle(climb: Climb) -> str:
-    """Subtitle in the climb list, e.g. "Green tag · Proposed V2"."""
-    return f"{climb.tag} tag · Proposed {climb.grade_label}"
+    """Subtitle in the climb list, e.g. "Green tag · V2"."""
+    return f"{climb.tag} tag · {climb.grade_label}"
 
 
 def climb_details(climb: Climb, section: Section | None) -> list[tuple[str, str]]:
     """(label, value) rows for the climb detail screen; the label is shown first."""
     return [
-        ("Proposed grade", climb.grade_label),
+        ("Grade", climb.grade_label),
         ("Tag", f"{climb.tag} ({climb.tag.range_label})"),
         ("Hold color", climb.hold_color),
         ("Section", section.name if section else "Unknown"),

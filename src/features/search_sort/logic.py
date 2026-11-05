@@ -47,14 +47,14 @@ def search_climbs(
 
 
 def result_subtitle(climb: Climb, section: Section) -> str:
-    """Subtitle in the results list, e.g. "Blue tag · Proposed V5 · Section 3"."""
-    return f"{climb.tag} tag · Proposed {climb.grade_label} · {section.name}"
+    """Subtitle in the results list, e.g. "Blue tag · V5 · Section 3"."""
+    return f"{climb.tag} tag · {climb.grade_label} · {section.name}"
 
 
 def climb_details(climb: Climb, section: Section) -> list[tuple[str, str]]:
     """(label, value) rows for the climb detail screen; the label is shown first."""
     return [
-        ("Proposed grade", climb.grade_label),
+        ("Grade", climb.grade_label),
         ("Tag", f"{climb.tag} ({climb.tag.range_label})"),
         ("Hold color", climb.hold_color),
         ("Section", section.name),

@@ -37,7 +37,7 @@ def open_section(ctx: AppContext, section: Section) -> SectionScreen:
 
 def open_climb(ctx: AppContext, climb: Climb) -> None:
     section = ctx.repos.climbs.get_section(climb.section_id)
-    # Label first, value after it on the same line: "Proposed grade      V5".
+    # Label first, value after it on the same line: "Grade      V5".
     rows = [
         ft.ListTile(title=ft.Text(label), trailing=ft.Text(value, size=16))
         for label, value in logic.climb_details(climb, section)

@@ -66,12 +66,12 @@ def test_every_sort_order_has_a_label():
 
 
 def test_result_subtitle():
-    assert result_subtitle(CLIMBS[0], SECTIONS["s2"]) == "Blue tag · Proposed V4 · Section 2"
+    assert result_subtitle(CLIMBS[0], SECTIONS["s2"]) == "Blue tag · V4 · Section 2"
 
 
 def test_climb_details_rows():
     assert climb_details(CLIMBS[0], SECTIONS["s2"]) == [
-        ("Proposed grade", "V4"),
+        ("Grade", "V4"),
         ("Tag", "Blue (V3–V5)"),
         ("Hold color", "Red"),
         ("Section", "Section 2"),

@@ -1,17 +1,17 @@
 from datetime import UTC, datetime
 
 from core.memory_repo import DEMO_USER_ID, seed_repositories
-from core.models import Ascent, AscentStyle, Comment, TagColor
+from core.models import Ascent, AscentStyle, Climb, Comment, TagColor
 
 
-def test_seed_has_four_numbered_sections_with_two_or_three_climbs():
+def test_seed_has_four_numbered_sections_that_all_have_climbs():
     repo = seed_repositories().climbs
     sections = repo.list_sections()
 
     assert [s.number for s in sections] == list(range(1, 5))
     for section in sections:
         climbs = repo.list_climbs(section.id)
-        assert 2 <= len(climbs) <= 3
+        assert climbs
         assert all(c.section_id == section.id for c in climbs)
         assert section.wall_image == f"walls/section_{section.number}.jpg"
 
@@ -65,12 +65,12 @@ def test_demo_user_exists():
 
 
 def test_climb_title_comes_from_hold_color():
-    climb = seed_repositories().climbs.get_climb("s1c1")
-    assert climb.title == "Yellow holds"
+    climb = Climb("x", "s1", 2, TagColor.GREEN, "Blue")
+    assert climb.title == "Blue holds"
 
 
-def test_seeded_hold_colors_are_unique_within_a_section():
+def test_seeded_climbs_differ_by_hold_color_or_tag_within_a_section():
     repo = seed_repositories().climbs
     for section in repo.list_sections():
-        colors = [c.hold_color for c in repo.list_climbs(section.id)]
-        assert len(colors) == len(set(colors))
+        pairs = [(c.hold_color, c.tag) for c in repo.list_climbs(section.id)]
+        assert len(pairs) == len(set(pairs))

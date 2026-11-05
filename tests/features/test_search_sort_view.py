@@ -1,6 +1,6 @@
 """Search screen behavior, checked without a UI via RecordingNavigator."""
 
-from features.search_sort import view
+from features.search_sort import logic, view
 
 
 def test_starts_with_every_climb_easiest_first(ctx):
@@ -11,11 +11,15 @@ def test_starts_with_every_climb_easiest_first(ctx):
 
 
 def test_typing_narrows_the_results(ctx):
-    target = ctx.repos.climbs.list_climbs()[0]
+    climbs = ctx.repos.climbs.list_climbs()
+    target = climbs[0]
+    expected = {c.id for c in climbs if c.title == target.title}
     screen = view.SearchScreen(ctx)
     screen.search_box.value = target.title
     screen.search_box.on_change(None)
-    assert [tile.title.value for tile in screen.results.controls] == [target.title]
+    assert len(expected) < len(climbs)
+    assert {c.id for c in screen.visible_climbs()} == expected
+    assert {tile.title.value for tile in screen.results.controls} == {target.title}
 
 
 def test_changing_the_sort_reorders_the_results(ctx):
@@ -38,7 +42,12 @@ def test_tapping_a_result_pushes_its_detail_screen_and_keeps_the_search(ctx):
     screen = view.SearchScreen(ctx)
     screen.search_box.value = target.title
     screen.refresh()
-    screen.results.controls[0].on_click(None)
-    title, _ = ctx.nav.stack[-1]
+    # Titles can repeat, so tap the last result and check the details are that climb's.
+    tapped = screen.visible_climbs()[-1]
+    screen.results.controls[-1].on_click(None)
+    title, detail = ctx.nav.stack[-1]
     assert title == target.title
+    rows = {tile.title.value: tile.trailing.value for tile in detail.controls}
+    section = ctx.repos.climbs.get_section(tapped.section_id)
+    assert rows == dict(logic.climb_details(tapped, section))
     assert screen.search_box.value == target.title

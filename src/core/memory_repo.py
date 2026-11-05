@@ -72,27 +72,36 @@ class InMemoryUserRepository:
         return list(self._users.values())
 
 
-# Section number -> (hold color, tag, proposed grade) placeholders for each climb on that
-# wall. Every tag is used at least once, and hold colors deliberately differ from tags so
-# the UI shows they are independent.
+# Section number -> (hold color, tag, grade) placeholders for each climb on that wall.
+# Every tag is used at least once. A hold color can repeat within a section, so hold color
+# and tag together tell its climbs apart.
 _SECTION_CLIMBS: dict[int, list[tuple[str, TagColor, int]]] = {
     1: [
-        ("Yellow", TagColor.RED, 0),
-        ("Red", TagColor.BLUE, 4),
-        ("Blue", TagColor.GREEN, 2),
+        ("Red", TagColor.RED, 0),
+        ("White", TagColor.WHITE, 3),
+        ("Blue", TagColor.YELLOW, 1),
+        ("Red", TagColor.YELLOW, 1),
+        ("Yellow", TagColor.PINK, 8),
     ],
     2: [
-        ("Black", TagColor.PURPLE, 6),
+        ("Pink", TagColor.BLUE, 4),
+        ("Green", TagColor.BLACK, 5),
+        ("Yellow", TagColor.PURPLE, 6),
         ("Green", TagColor.WHITE, 3),
+        ("Blue", TagColor.RED, 0),
     ],
     3: [
-        ("Purple", TagColor.BLACK, 5),
-        ("Green", TagColor.ORANGE, 7),
-        ("Pink", TagColor.YELLOW, 1),
+        ("Blue", TagColor.ORANGE, 7),
+        ("Green", TagColor.BLUE, 4),
+        ("Red", TagColor.WHITE, 3),
+        ("White", TagColor.PURPLE, 6),
+        ("Red", TagColor.GREEN, 2),
     ],
     4: [
-        ("White", TagColor.PINK, 8),
-        ("Pink", TagColor.YELLOW, 2),
+        ("Purple", TagColor.BLACK, 5),
+        ("Green", TagColor.PINK, 8),
+        ("Purple", TagColor.ORANGE, 7),
+        ("Yellow", TagColor.YELLOW, 1),
     ],
 }
 

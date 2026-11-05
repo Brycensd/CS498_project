@@ -87,16 +87,16 @@ def test_section_summary():
     assert section_summary([]) == "No climbs"
 
 
-def test_climb_subtitle_shows_tag_and_proposed_grade():
-    assert climb_subtitle(climb("x", 5, "Pink")) == "Blue tag · Proposed V5"
+def test_climb_subtitle_shows_tag_and_grade():
+    assert climb_subtitle(climb("x", 5, "Pink")) == "Blue tag · V5"
 
 
 def test_climb_details():
     section = Section("s1", "g1", 1, "Section 1")
     rows = climb_details(CLIMBS[0], section)
-    assert [label for label, _ in rows][:3] == ["Proposed grade", "Tag", "Hold color"]
+    assert [label for label, _ in rows][:3] == ["Grade", "Tag", "Hold color"]
     assert dict(rows) == {
-        "Proposed grade": "V4",
+        "Grade": "V4",
         "Tag": "Blue (V3–V5)",
         "Hold color": "Red",
         "Section": "Section 1",

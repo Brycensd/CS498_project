@@ -2,7 +2,7 @@
 
 import flet as ft
 
-from features.sections import view
+from features.sections import logic, view
 
 
 def test_section_list_shows_all_four_sections(ctx):
@@ -23,9 +23,13 @@ def test_tapping_a_section_then_a_climb_pushes_two_screens(ctx):
     climb_list = screen.controls[2]
     climb_list.controls[0].on_click(None)
     assert len(ctx.nav.stack) == 2
-    climb_title, _ = ctx.nav.stack[-1]
-    expected = min(ctx.repos.climbs.list_climbs("s3"), key=lambda c: (c.grade, c.title))
+    climb_title, detail = ctx.nav.stack[-1]
+    expected = min(ctx.repos.climbs.list_climbs("s3"), key=lambda c: (c.grade, c.title, c.id))
     assert climb_title == expected.title
+    # Titles can repeat, so check the details are this climb's. The first control is the header.
+    rows = {tile.title.value: tile.trailing.value for tile in detail.controls[1:]}
+    section = ctx.repos.climbs.get_section("s3")
+    assert rows == dict(logic.climb_details(expected, section))
 
 
 def test_section_screen_sorts_and_filters(ctx):
