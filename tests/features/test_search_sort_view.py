@@ -1,5 +1,6 @@
 """Search screen behavior, checked without a UI via RecordingNavigator."""
 
+from core.events import SectionRequested
 from features.search_sort import logic, view
 
 
@@ -47,7 +48,23 @@ def test_tapping_a_result_pushes_its_detail_screen_and_keeps_the_search(ctx):
     screen.results.controls[-1].on_click(None)
     title, detail = ctx.nav.stack[-1]
     assert title == target.title
-    rows = {tile.title.value: tile.trailing.value for tile in detail.controls}
+    # The last control is the View Section button.
+    rows = {tile.title.value: tile.trailing.value for tile in detail.controls[:-1]}
     section = ctx.repos.climbs.get_section(tapped.section_id)
     assert rows == dict(logic.climb_details(tapped, section))
     assert screen.search_box.value == target.title
+
+
+def test_view_section_button_requests_the_climbs_section(ctx):
+    requests = []
+    ctx.events.subscribe(SectionRequested, requests.append)
+    screen = view.SearchScreen(ctx)
+    tapped = screen.visible_climbs()[-1]
+    screen.results.controls[-1].on_click(None)
+    _, detail = ctx.nav.stack[-1]
+
+    button = detail.controls[-1].content
+    assert button.content == "View Section"
+    button.on_click(None)
+
+    assert requests == [SectionRequested(tapped.section_id)]

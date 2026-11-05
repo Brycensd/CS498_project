@@ -5,6 +5,7 @@ from __future__ import annotations
 import flet as ft
 
 from core.context import AppContext
+from core.events import SectionRequested
 from core.models import Climb
 
 from . import logic
@@ -77,6 +78,14 @@ class SearchScreen:
             ft.ListTile(title=ft.Text(label), trailing=ft.Text(value, size=16))
             for label, value in logic.climb_details(climb, self._sections[climb.section_id])
         ]
+        view_section = ft.Container(
+            padding=ft.Padding.symmetric(horizontal=16, vertical=8),
+            content=ft.Button(
+                "View Section",
+                on_click=lambda _e: self._ctx.events.publish(SectionRequested(climb.section_id)),
+            ),
+        )
         self._ctx.nav.push(
-            climb.title, ft.Column(expand=True, scroll=ft.ScrollMode.AUTO, controls=rows)
+            climb.title,
+            ft.Column(expand=True, scroll=ft.ScrollMode.AUTO, controls=[*rows, view_section]),
         )

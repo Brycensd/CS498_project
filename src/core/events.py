@@ -10,11 +10,19 @@ from __future__ import annotations
 import logging
 from collections import defaultdict
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import Any, TypeVar
 
 log = logging.getLogger(__name__)
 
 E = TypeVar("E")
+
+
+@dataclass(frozen=True, slots=True)
+class SectionRequested:
+    """Ask for a section's page to be opened. The sections feature handles this."""
+
+    section_id: str
 
 
 class EventBus:

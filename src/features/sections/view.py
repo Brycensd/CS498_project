@@ -2,17 +2,27 @@
 
 from __future__ import annotations
 
+from weakref import WeakSet
+
 import flet as ft
 
 from core.context import AppContext
+from core.events import EventBus, SectionRequested
 from core.models import Climb, Section, TagColor
 
 from . import logic
 
 ALL_COLORS = "all"
 
+# build_view runs on every tab switch, so this keeps each bus from getting the handler
+# more than once, which would open the requested section several times.
+_subscribed_buses: WeakSet[EventBus] = WeakSet()
+
 
 def build_view(ctx: AppContext) -> ft.Control:
+    if ctx.events not in _subscribed_buses:
+        _subscribed_buses.add(ctx.events)
+        ctx.events.subscribe(SectionRequested, lambda event: _on_section_requested(ctx, event))
     repo = ctx.repos.climbs
     tiles = []
     for section in repo.list_sections():
@@ -27,6 +37,12 @@ def build_view(ctx: AppContext) -> ft.Control:
             )
         )
     return ft.ListView(expand=True, controls=tiles)
+
+
+def _on_section_requested(ctx: AppContext, event: SectionRequested) -> None:
+    section = ctx.repos.climbs.get_section(event.section_id)
+    if section is not None:
+        open_section(ctx, section)
 
 
 def open_section(ctx: AppContext, section: Section) -> SectionScreen:
