@@ -23,3 +23,7 @@ class Feature:
     # ever opened. Use it for work like subscribing to events; build_view runs on every
     # tab switch, so subscribing there would add a handler each time.
     setup: Callable[[AppContext], None] | None = None
+    # False keeps the feature off the NavigationBar. Its setup hook still runs, so it can
+    # open its screens with ctx.nav.push when another feature asks through an event (e.g.
+    # the profile screen, opened from the home page).
+    show_tab: bool = True

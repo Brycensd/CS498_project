@@ -25,6 +25,24 @@ class SectionRequested:
     section_id: str
 
 
+@dataclass(frozen=True, slots=True)
+class ProfileRequested:
+    """Ask for a climber's profile page to be opened. The profile feature handles this."""
+
+    user_id: str
+
+
+@dataclass(frozen=True, slots=True)
+class ProfileUpdated:
+    """A climber's profile changed (name, bio or logged sends); views showing it may redraw.
+
+    Published by the profile feature after it saves. The home page uses it to refresh its
+    header so the change shows when the user goes back.
+    """
+
+    user_id: str
+
+
 class EventBus:
     def __init__(self) -> None:
         self._handlers: dict[type, list[Callable[[Any], None]]] = defaultdict(list)

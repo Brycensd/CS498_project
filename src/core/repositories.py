@@ -51,6 +51,10 @@ class UserRepository(Protocol):
 
     def list_users(self) -> list[User]: ...
 
+    def update(self, user: User) -> None:
+        """Replace the stored user that has user.id. Raises KeyError for an unknown id."""
+        ...
+
 
 class NewsRepository(Protocol):
     """Gym news. Read-only for now; add/edit/delete arrive with the admin system."""
