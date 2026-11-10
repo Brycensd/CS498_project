@@ -133,6 +133,21 @@ _DEMO_ASCENTS: list[tuple[str, AscentStyle, int]] = [
     ("s4c2", AscentStyle.FLASH, 24),
 ]
 
+# Other placeholder climbers as (user id, display name, climb ids sent in order), so the
+# leaderboard has rivals for the demo user. A climb listed twice is logged as a repeat.
+# Ids are names rather than u2, u3... so they don't clash with users made up in tests.
+_PLACEHOLDER_CLIMBERS: list[tuple[str, str, list[str]]] = [
+    ("maya", "Maya Chen", ["s3c1", "s1c5"]),
+    ("leo", "Leo Park", ["s4c2", "s4c2"]),
+    ("ana", "Ana Ruiz", ["s2c3", "s3c1", "s4c3"]),
+    ("ben", "Ben Okafor", ["s4c3"]),
+    ("chris", "Chris Dunn", ["s2c2", "s3c4"]),
+    ("dana", "Dana Fox", ["s2c2", "s4c1"]),
+    ("fay", "Fay Lin", ["s2c1", "s4c1"]),
+    ("eli", "Eli Grant", ["s1c2", "s2c4", "s3c3"]),
+    ("gus", "Gus Moreno", ["s1c1"]),
+]
+
 _NEWS = [
     NewsPost(
         id="n1",
@@ -148,7 +163,7 @@ _NEWS = [
 
 
 def seed_repositories() -> Repositories:
-    """Build repositories with the placeholder climbs, demo user, sends and news above."""
+    """Build repositories with the placeholder climbs, climbers, sends and news above."""
     gym = Gym(id="g1", name="Demo Gym")
     sections: list[Section] = []
     climbs: list[Climb] = []
@@ -183,6 +198,18 @@ def seed_repositories() -> Repositories:
                 climbed_at=datetime(2026, 10, day, 18, 0, tzinfo=UTC),
             )
         )
+    for user_id, display_name, climb_ids in _PLACEHOLDER_CLIMBERS:
+        users.append(User(id=user_id, display_name=display_name))
+        for i, climb_id in enumerate(climb_ids):
+            ascents.add(
+                Ascent(
+                    id=f"{user_id}a{i + 1}",
+                    user_id=user_id,
+                    climb_id=climb_id,
+                    style=AscentStyle.REPEAT if climb_id in climb_ids[:i] else AscentStyle.SEND,
+                    climbed_at=datetime(2026, 10, i + 1, 18, 0, tzinfo=UTC),
+                )
+            )
     return Repositories(
         climbs=InMemoryClimbRepository(gym, sections, climbs),
         ascents=ascents,
