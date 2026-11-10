@@ -28,6 +28,8 @@ src/
     home/                 profile summary (name, picture, hardest send) and gym news
     sections/             section -> wall photo -> climb detail browsing
     search_sort/          search every climb, sort, jump to its section
+    profile/              your profile: edit name and bio, log climbs, hardest send, send
+                          history (no tab; opened from home via ProfileRequested)
 tests/
   conftest.py             fake AppContext fixture (page=None, recording navigator)
   test_*.py               core tests + smoke test over every feature
@@ -89,7 +91,9 @@ both, so moving photos to a server later does not change the model.
 
 `registry.discover_features()` imports every package under `features/` that does not start
 with `_`, reads its `FEATURE`, and sorts by `(order, title)`. Each feature becomes one
-`NavigationBar` destination.
+`NavigationBar` destination, unless it sets `Feature(..., show_tab=False)`: such a feature
+gets no tab but its `setup` hook still runs, so it can open screens with `ctx.nav.push` in
+response to an event (the profile screen works this way). The counts below are of tabs.
 
 - **0 features** - the shell shows a "no features" message (plus any load errors).
 - **1 feature** - no `NavigationBar` (Flutter requires 2+ destinations); the view fills the
