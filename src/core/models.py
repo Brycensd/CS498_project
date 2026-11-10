@@ -133,6 +133,8 @@ class User:
     # Profile picture: an asset path (e.g. "avatars/daniel_woods.png") or a URL, like
     # Section.wall_image. None means no picture; the UI shows initials instead.
     avatar: str | None = None
+    # Short "about me" text shown on the profile page. Empty means no bio.
+    bio: str = ""
 
 
 @dataclass(frozen=True, slots=True)

@@ -114,6 +114,23 @@ def test_every_feature_is_set_up_once_before_the_first_view_is_built(ctx):
     assert calls == ["setup first", "setup second", "build", "build"]
 
 
+def test_feature_without_a_tab_is_set_up_but_not_shown(ctx):
+    set_up = []
+    hidden = Feature(
+        id="hidden",
+        title="Hidden",
+        icon=ft.Icons.STAR,
+        build_view=lambda _ctx: ft.Text("hidden"),
+        setup=lambda _ctx: set_up.append("hidden"),
+        show_tab=False,
+    )
+    page = FakePage()
+    AppShell(page, ctx, [hidden, feature("a"), feature("b")]).mount()
+
+    assert set_up == ["hidden"]
+    assert [d.label for d in page.views[0].navigation_bar.destinations] == ["A", "B"]
+
+
 def test_feature_that_crashes_during_setup_does_not_stop_the_others(ctx):
     def crash(_ctx):
         raise RuntimeError("kaput")

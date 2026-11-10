@@ -4,7 +4,8 @@ from dataclasses import replace
 
 import flet as ft
 
-from core.memory_repo import InMemoryNewsRepository
+from core.events import ProfileRequested, ProfileUpdated
+from core.memory_repo import DEMO_USER_ID, InMemoryNewsRepository
 from core.models import User
 from features.home import view
 
@@ -25,11 +26,30 @@ def texts(control: ft.Control) -> list[str]:
 def test_header_stacks_name_then_picture_then_hardest_send(ctx):
     header = view.build_view(ctx).controls[0]
 
-    name, picture, send = header.controls
+    name, picture, send, _profile_button = header.controls
     assert name.value == "Daniel Woods"
     assert isinstance(picture, ft.CircleAvatar)
     assert picture.foreground_image_src == "avatars/daniel_woods.png"
     assert texts(send) == ["Hardest send", "V8"]
+
+
+def test_view_profile_button_requests_the_profile(ctx):
+    requests = []
+    ctx.events.subscribe(ProfileRequested, requests.append)
+
+    view.build_view(ctx).controls[0].controls[-1].on_click(None)
+
+    assert requests == [ProfileRequested(DEMO_USER_ID)]
+
+
+def test_header_redraws_when_profile_is_updated(ctx):
+    view.setup(ctx)
+    header = view.build_view(ctx).controls[0]
+    ctx.current_user = replace(ctx.current_user, display_name="Dan Woods")
+
+    ctx.events.publish(ProfileUpdated(DEMO_USER_ID))
+
+    assert header.controls[0].value == "Dan Woods"
 
 
 def test_news_shows_the_anniversary_post(ctx):

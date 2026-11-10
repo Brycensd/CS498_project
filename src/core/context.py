@@ -25,3 +25,7 @@ class AppContext:
         """Show a short snackbar message. No-op when there is no page (tests)."""
         if self.page is not None:
             self.page.show_dialog(ft.SnackBar(content=ft.Text(text)))
+            # show_dialog updates only the snackbar, and any explicit update makes Flet skip
+            # its automatic update after the event handler. Update the whole page so changes
+            # the handler made before showing the message are still sent.
+            self.page.update()

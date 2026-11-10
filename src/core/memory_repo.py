@@ -82,6 +82,11 @@ class InMemoryUserRepository:
     def list_users(self) -> list[User]:
         return list(self._users.values())
 
+    def update(self, user: User) -> None:
+        if user.id not in self._users:
+            raise KeyError(user.id)
+        self._users[user.id] = user
+
 
 class InMemoryNewsRepository:
     def __init__(self, posts: list[NewsPost]) -> None:
@@ -186,7 +191,14 @@ def seed_repositories() -> Repositories:
                     hold_color=hold_color,
                 )
             )
-    users = [User(id=DEMO_USER_ID, display_name="Daniel Woods", avatar="avatars/daniel_woods.png")]
+    users = [
+        User(
+            id=DEMO_USER_ID,
+            display_name="Daniel Woods",
+            avatar="avatars/daniel_woods.png",
+            bio="Boulderer. Usually on the Section 4 overhang after work.",
+        )
+    ]
     ascents = InMemoryAscentRepository()
     for i, (climb_id, style, day) in enumerate(_DEMO_ASCENTS, start=1):
         ascents.add(

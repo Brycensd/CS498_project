@@ -60,7 +60,9 @@ class AppShell:
     ) -> None:
         self._page = page
         self._ctx = ctx
-        self._features = features
+        # Every feature is set up; only those with show_tab get a tab.
+        self._all_features = features
+        self._features = [f for f in features if f.show_tab]
         self._load_errors = load_errors or []
         self._body = ft.Container(expand=True)
 
@@ -70,7 +72,7 @@ class AppShell:
         root.padding = 0
         root.controls = [ft.SafeArea(expand=True, content=self._body)]
 
-        for feature in self._features:
+        for feature in self._all_features:
             run_feature_setup(feature, self._ctx)
 
         # Flutter's NavigationBar needs at least 2 destinations, so with a single

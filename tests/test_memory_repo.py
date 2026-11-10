@@ -1,5 +1,8 @@
+from dataclasses import replace
 from datetime import UTC, date, datetime
 from pathlib import Path
+
+import pytest
 
 from core.memory_repo import (
     DEMO_USER_ID,
@@ -7,7 +10,7 @@ from core.memory_repo import (
     InMemoryNewsRepository,
     seed_repositories,
 )
-from core.models import Ascent, AscentStyle, Climb, Comment, NewsPost, TagColor
+from core.models import Ascent, AscentStyle, Climb, Comment, NewsPost, TagColor, User
 
 ASSETS = Path(__file__).resolve().parents[1] / "src" / "assets"
 
@@ -104,6 +107,17 @@ def test_demo_user_exists_with_a_picture_on_disk():
     assert user.display_name == "Daniel Woods"
     assert (ASSETS / user.avatar).is_file()
     assert users.get("nobody") is None
+
+
+def test_user_update_replaces_by_id_and_rejects_unknown_ids():
+    users = seed_repositories().users
+    user = users.get(DEMO_USER_ID)
+    users.update(replace(user, bio="New bio"))
+
+    assert users.get(DEMO_USER_ID).bio == "New bio"
+    assert len(users.list_users()) == len(seed_repositories().users.list_users())
+    with pytest.raises(KeyError):
+        users.update(User("nobody", "Nobody"))
 
 
 def test_climb_title_comes_from_hold_color():

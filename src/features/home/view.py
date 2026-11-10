@@ -5,25 +5,42 @@ from __future__ import annotations
 import flet as ft
 
 from core.context import AppContext
+from core.events import ProfileRequested, ProfileUpdated
 from core.models import NewsPost, User
 
 from . import logic
 
 AVATAR_RADIUS = 56
 
+# The header of the most recently built home view. The ProfileUpdated handler redraws it so
+# edits made on the profile screen show as soon as the user comes back.
+_header: ft.Column | None = None
+
+
+def setup(ctx: AppContext) -> None:
+    ctx.events.subscribe(ProfileUpdated, lambda _event: refresh_header(ctx))
+
+
+def refresh_header(ctx: AppContext) -> None:
+    if _header is not None and ctx.current_user is not None:
+        _header.controls = profile_header(ctx, ctx.current_user).controls
+
 
 def build_view(ctx: AppContext) -> ft.Control:
+    global _header
     controls: list[ft.Control] = []
+    _header = None
     if ctx.current_user is not None:
-        controls.append(profile_header(ctx, ctx.current_user))
+        _header = profile_header(ctx, ctx.current_user)
+        controls.append(_header)
     controls.append(ft.Text("News", theme_style=ft.TextThemeStyle.TITLE_LARGE))
     posts = ctx.repos.news.list_posts()
     controls.extend([news_card(p) for p in posts] or [ft.Text("No news yet")])
     return ft.ListView(expand=True, padding=16, spacing=12, controls=controls)
 
 
-def profile_header(ctx: AppContext, user: User) -> ft.Control:
-    """Name, then picture, then hardest send, stacked and centered."""
+def profile_header(ctx: AppContext, user: User) -> ft.Column:
+    """Name, picture, hardest send and a View profile button, stacked and centered."""
     climbs = {c.id: c for c in ctx.repos.climbs.list_climbs()}
     best = logic.hardest_send(ctx.repos.ascents.list_for_user(user.id), climbs)
     return ft.Column(
@@ -46,6 +63,12 @@ def profile_header(ctx: AppContext, user: User) -> ft.Control:
                         theme_style=ft.TextThemeStyle.HEADLINE_MEDIUM,
                     ),
                 ],
+            ),
+            # Opened by the profile feature, which subscribes to ProfileRequested.
+            ft.OutlinedButton(
+                "View profile",
+                icon=ft.Icons.PERSON,
+                on_click=lambda _e: ctx.events.publish(ProfileRequested(user.id)),
             ),
         ],
     )
