@@ -62,6 +62,17 @@ def test_demo_user_starts_with_sends_of_real_climbs():
     assert all(repos.climbs.get_climb(a.climb_id) is not None for a in sends)
 
 
+def test_seeded_ascents_reference_existing_users_and_climbs():
+    repos = seed_repositories()
+    users = repos.users.list_users()
+    assert len(users) > 1
+    for user in users:
+        for ascent in repos.ascents.list_for_user(user.id):
+            assert repos.climbs.get_climb(ascent.climb_id) is not None, ascent
+    total = sum(len(repos.ascents.list_for_user(u.id)) for u in users)
+    assert total == sum(len(repos.ascents.list_for_climb(c.id)) for c in repos.climbs.list_climbs())
+
+
 def test_news_is_seeded_with_the_anniversary_post():
     posts = seed_repositories().news.list_posts()
     assert posts[0].title == "Anniversary Party"
